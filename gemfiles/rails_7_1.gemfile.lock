@@ -111,6 +111,7 @@ GEM
     crass (1.0.6)
     date (3.4.1)
     diff-lcs (1.5.1)
+    docile (1.4.1)
     drb (2.2.1)
     erubi (1.13.1)
     factory_bot (6.5.1)
@@ -227,6 +228,7 @@ GEM
     regexp_parser (2.10.0)
     reline (0.6.0)
       io-console (~> 0.5)
+    rexml (3.4.0)
     rspec (3.13.0)
       rspec-core (~> 3.13.0)
       rspec-expectations (~> 3.13.0)
@@ -259,6 +261,15 @@ GEM
     rubocop-rspec (3.4.0)
       rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
+    simplecov (0.22.0)
+      docile (~> 1.1)
+      simplecov-html (~> 0.11)
+      simplecov_json_formatter (~> 0.1)
+    simplecov-cobertura (2.1.0)
+      rexml
+      simplecov (~> 0.19)
+    simplecov-html (0.13.1)
+    simplecov_json_formatter (0.1.4)
     sqlite3 (1.7.3-aarch64-linux)
     sqlite3 (1.7.3-arm-linux)
     sqlite3 (1.7.3-arm64-darwin)
@@ -304,6 +315,8 @@ DEPENDENCIES
   rubocop-factory_bot
   rubocop-rake
   rubocop-rspec
+  simplecov
+  simplecov-cobertura
   sqlite3 (~> 1.5)
   temping
 

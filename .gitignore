@@ -15,3 +15,5 @@
 /spec/dummy_app/tmp
 
 /log
+
+/coverage
