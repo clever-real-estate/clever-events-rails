@@ -2,6 +2,9 @@ PATH
   remote: ..
   specs:
     clever_events_rails (0.1.0)
+      activesupport
+      aws-sdk-sns
+      railties (>= 4.1)
 
 GEM
   remote: https://rubygems.org/
@@ -82,10 +85,25 @@ GEM
       rake
       thor (>= 0.14.0)
     ast (2.4.2)
+    aws-eventstream (1.3.0)
+    aws-partitions (1.1050.0)
+    aws-sdk-core (3.218.1)
+      aws-eventstream (~> 1, >= 1.3.0)
+      aws-partitions (~> 1, >= 1.992.0)
+      aws-sigv4 (~> 1.9)
+      base64
+      jmespath (~> 1, >= 1.6.1)
+    aws-sdk-sns (1.95.0)
+      aws-sdk-core (~> 3, >= 3.216.0)
+      aws-sigv4 (~> 1.5)
+    aws-sigv4 (1.11.0)
+      aws-eventstream (~> 1, >= 1.0.2)
     base64 (0.2.0)
     benchmark (0.4.0)
     bigdecimal (3.1.9)
     builder (3.3.0)
+    byebug (11.1.3)
+    coderay (1.1.3)
     concurrent-ruby (1.3.5)
     connection_pool (2.5.0)
     crass (1.0.6)
@@ -93,6 +111,8 @@ GEM
     diff-lcs (1.5.1)
     drb (2.2.1)
     erubi (1.13.1)
+    factory_bot (6.5.1)
+      activesupport (>= 6.1.0)
     globalid (1.2.1)
       activesupport (>= 6.1)
     i18n (1.14.7)
@@ -102,6 +122,7 @@ GEM
       pp (>= 0.6.0)
       rdoc (>= 4.0.0)
       reline (>= 0.4.2)
+    jmespath (1.6.2)
     json (2.10.1)
     language_server-protocol (3.17.0.4)
     logger (1.6.5)
@@ -114,6 +135,7 @@ GEM
       net-pop
       net-smtp
     marcel (1.0.4)
+    method_source (1.1.0)
     mini_mime (1.1.5)
     minitest (5.25.4)
     net-imap (0.5.6)
@@ -149,6 +171,12 @@ GEM
     pp (0.6.2)
       prettyprint
     prettyprint (0.2.0)
+    pry (0.14.2)
+      coderay (~> 1.1)
+      method_source (~> 1.0)
+    pry-byebug (3.10.1)
+      byebug (~> 11.0)
+      pry (>= 0.13, < 0.15)
     psych (5.2.3)
       date
       stringio
@@ -222,9 +250,26 @@ GEM
       unicode-display_width (>= 2.4.0, < 4.0)
     rubocop-ast (1.38.0)
       parser (>= 3.3.1.0)
+    rubocop-factory_bot (2.26.1)
+      rubocop (~> 1.61)
+    rubocop-rake (0.6.0)
+      rubocop (~> 1.0)
+    rubocop-rspec (3.4.0)
+      rubocop (~> 1.61)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
+    sqlite3 (2.5.0-aarch64-linux-gnu)
+    sqlite3 (2.5.0-aarch64-linux-musl)
+    sqlite3 (2.5.0-arm-linux-gnu)
+    sqlite3 (2.5.0-arm-linux-musl)
+    sqlite3 (2.5.0-arm64-darwin)
+    sqlite3 (2.5.0-x86_64-darwin)
+    sqlite3 (2.5.0-x86_64-linux-gnu)
+    sqlite3 (2.5.0-x86_64-linux-musl)
     stringio (3.1.2)
+    temping (4.3.0)
+      activerecord (>= 6.0, < 8.1)
+      activesupport (>= 6.0, < 8.1)
     thor (1.3.2)
     timeout (0.4.3)
     tzinfo (2.0.6)
@@ -253,10 +298,18 @@ PLATFORMS
 DEPENDENCIES
   appraisal
   clever_events_rails!
+  factory_bot
+  pry
+  pry-byebug
   rails (= 8.0.1)
-  rake (~> 13.0)
-  rspec (~> 3.0)
-  rubocop (~> 1.21)
+  rake
+  rspec
+  rubocop
+  rubocop-factory_bot
+  rubocop-rake
+  rubocop-rspec
+  sqlite3 (>= 2.1)
+  temping
 
 BUNDLED WITH
    2.6.3
