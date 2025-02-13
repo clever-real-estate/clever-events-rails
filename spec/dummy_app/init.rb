@@ -7,6 +7,7 @@ require "rails"
 
 %w[
   active_record/railtie
+  action_controller/railtie
 ].each do |railtie|
   require railtie
 rescue LoadError # rubocop:disable Lint/SuppressedException
@@ -14,7 +15,6 @@ end
 
 require "clever_events_rails"
 require "securerandom"
-require "temping"
 
 module DummyApp
   class Application < Rails::Application

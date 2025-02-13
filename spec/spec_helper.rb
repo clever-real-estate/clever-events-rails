@@ -38,19 +38,15 @@ RSpec.configure do |config|
   config.include FactoryBot::Syntax::Methods
 
   config.before do
-    Temping.create(:test_object) do
-      with_columns do |t|
-        t.string :first_name
-        t.string :last_name
-      end
-
-      include Events::Publisher::Publishable
-
-      publishable_attrs :first_name, :last_name, :email, :phone
-      publishable_actions :created, :updated, :destroyed
-
-      def publish_event!(_event_name)
-        true
+    ActiveRecord::Base.class_eval do
+      connection.instance_eval do
+        create_table :test_objects, force: true do |t|
+          t.string :first_name
+          t.string :last_name
+          t.string :email
+          t.string :phone
+          t.timestamps
+        end
       end
     end
   end

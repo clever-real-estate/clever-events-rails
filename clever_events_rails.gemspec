@@ -31,6 +31,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "pry-byebug"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rspec-rails"
   spec.add_development_dependency "rubocop"
   spec.add_development_dependency "rubocop-factory_bot"
   spec.add_development_dependency "rubocop-rake"
@@ -38,8 +39,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "temping"
 
-  # Uncomment to register a new dependency of your gem
-
-  # For more information and examples about making a new gem, check out our
-  # guide at: https://bundler.io/guides/creating_gem.html
+  spec.add_dependency "activesupport"
+  spec.add_dependency "aws-sdk-sns"
+  spec.add_runtime_dependency "railties", ">= 4.1"
 end
