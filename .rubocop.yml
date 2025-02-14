@@ -1,8 +1,25 @@
+require:
+  - rubocop-rspec
+  - rubocop-rake
+  - rubocop-factory_bot
+
 AllCops:
   TargetRubyVersion: 3.1
+  Exclude:
+    - "gemfiles/**/*"
+    - vendor/bundle/**/*
+
+Style/Documentation:
+  Enabled: false
 
 Style/StringLiterals:
   EnforcedStyle: double_quotes
 
 Style/StringLiteralsInInterpolation:
   EnforcedStyle: double_quotes
+
+RSpec/ExampleLength:
+  Enabled: false
+
+RSpec/NestedGroups:
+  Max: 5
