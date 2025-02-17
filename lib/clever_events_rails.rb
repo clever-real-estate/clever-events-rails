@@ -4,7 +4,7 @@ require_relative "clever_events_rails/version"
 
 module CleverEventsRails
   class Error < StandardError; end
-  require "rails"
+
   require "clever_events_rails/events/message"
   require "clever_events_rails/events/adapters"
   require "clever_events_rails/events/publisher/publishable"

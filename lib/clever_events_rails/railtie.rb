@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+require "rails/railtie"
 module CleverEventsRails
   class Railtie < ::Rails::Railtie
     config.clever_events_rails = ActiveSupport::OrderedOptions.new
