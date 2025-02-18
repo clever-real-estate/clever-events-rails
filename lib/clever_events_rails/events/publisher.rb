@@ -8,11 +8,17 @@ module Events
 
     included do
       after_commit do
-        publish_event!(event_name) if publish_event?
+        publish_event! if publish_event?
       end
 
-      def publish_event!(event_name)
+      def publish_event!
         Events::Publisher.publish_event!(event_name, self)
+      end
+
+      private
+
+      def event_name
+        "#{self.class.name}.#{event_type}"
       end
     end
 

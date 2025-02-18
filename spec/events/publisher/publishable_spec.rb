@@ -19,7 +19,7 @@ RSpec.describe Events::Publisher::Publishable do
 
       it "calls the publish_event! method" do
         test_object.update(first_name: "New Name")
-        expect(Events::Publisher).to have_received(:publish_event!).with("test_object.updated", test_object)
+        expect(Events::Publisher).to have_received(:publish_event!).with("TestObject.updated", test_object)
       end
 
       describe "when publish_event! raises an error" do
@@ -70,7 +70,7 @@ RSpec.describe Events::Publisher::Publishable do
 
       it "calls the publish_event! method" do
         test_object.destroy
-        expect(Events::Publisher).to have_received(:publish_event!).with("test_object.destroyed", test_object)
+        expect(Events::Publisher).to have_received(:publish_event!).with("TestObject.destroyed", test_object)
       end
 
       describe "when publish_event! raises an error" do

@@ -45,10 +45,6 @@ module Events
           :updated
         end
       end
-
-      def event_name
-        "#{self.class.name.underscore}.#{event_type}"
-      end
     end
   end
 end
