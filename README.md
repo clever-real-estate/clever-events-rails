@@ -3,7 +3,7 @@
 
 Add the gem to your gemfile:
 ```ruby
-gem "clever_events_rails", "~> 0.1.0", git: "https://github.com/clever-real-estate/clever-events-rails"
+gem "clever_events_rails", "~> 0.2.0", git: "https://github.com/clever-real-estate/clever-events-rails"
 ```
 
 ```
@@ -33,7 +33,7 @@ end
 ```
 > Note: `event_name` is a method included in whatever class includes CleverEvents::Publisher, which outputs a name in the structure of `object_class.action`, ex: `TestObject.updated`.
 
-And then make sure your implementation eventually calls `.publish_event!`:
+And then make sure your implementation eventually calls `.publish_event!` (make sure you include the `CleverEvents::Publisher` module to have access to `.publish_event!` wherever you call it from):
 ```ruby
 class SomeEventPublisherJob
   include CleverEvents::Publishaer
