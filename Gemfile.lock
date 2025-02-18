@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    clever_events_rails (0.1.0)
+    clever_events_rails (0.2.0)
       activesupport
       aws-sdk-sns
       railties (>= 4.1)
