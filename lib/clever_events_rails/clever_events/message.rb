@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Events
+module CleverEvents
   class Message
     attr_reader :event_name, :entity
 

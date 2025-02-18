@@ -2,11 +2,11 @@
 
 require "spec_helper"
 
-RSpec.describe Events::Publisher do
+RSpec.describe CleverEvents::Publisher do
   describe ".publish_event" do
     let(:test_object) { build_stubbed(:test_object) }
     let(:client) { Aws::SNS::Client.new(stub_responses: true) }
-    let(:adapter_class) { Events::Adapters::SnsAdapter }
+    let(:adapter_class) { CleverEvents::Adapters::SnsAdapter }
 
     before do
       allow(described_class).to receive(:event_adapter).and_return(adapter_class)
