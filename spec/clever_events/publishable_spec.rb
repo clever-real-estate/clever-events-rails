@@ -2,11 +2,11 @@
 
 require "spec_helper"
 
-RSpec.describe Events::Publisher::Publishable do
+RSpec.describe CleverEvents::Publishable do
   let(:test_object) { build_stubbed(:test_object) }
 
   before do
-    allow(Events::Publisher).to receive(:publish_event!)
+    allow(CleverEvents::Publisher).to receive(:publish_event!)
   end
 
   describe ".publishable_attrs" do
@@ -19,14 +19,14 @@ RSpec.describe Events::Publisher::Publishable do
 
       it "calls the publish_event! method" do
         test_object.update(first_name: "New Name")
-        expect(Events::Publisher).to have_received(:publish_event!).with("test_object.updated", test_object)
+        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.updated", test_object)
       end
 
       describe "when publish_event! raises an error" do
         let(:test_object) { build_stubbed(:test_object) }
 
         it "logs an error" do
-          allow(Events::Publisher).to receive(:publish_event!).and_raise(StandardError)
+          allow(CleverEvents::Publisher).to receive(:publish_event!).and_raise(StandardError)
 
           expect { test_object.update(first_name: "New Name") }.to raise_error(StandardError)
         end
@@ -39,7 +39,7 @@ RSpec.describe Events::Publisher::Publishable do
       it "does not call publish_event!" do
         allow(TestObject).to receive(:_publishable_attrs).and_return([])
         test_object.update(first_name: "new name")
-        expect(Events::Publisher).not_to have_received(:publish_event!)
+        expect(CleverEvents::Publisher).not_to have_received(:publish_event!)
       end
     end
 
@@ -49,7 +49,7 @@ RSpec.describe Events::Publisher::Publishable do
       it "does not call publish_event!" do
         allow(TestObject).to receive(:_publishable_attrs).and_return([:first_name])
         test_object.update(last_name: "New Name")
-        expect(Events::Publisher).not_to have_received(:publish_event!).with("test_object.updated", test_object)
+        expect(CleverEvents::Publisher).not_to have_received(:publish_event!).with("test_object.updated", test_object)
       end
     end
   end
@@ -70,14 +70,14 @@ RSpec.describe Events::Publisher::Publishable do
 
       it "calls the publish_event! method" do
         test_object.destroy
-        expect(Events::Publisher).to have_received(:publish_event!).with("test_object.destroyed", test_object)
+        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.destroyed", test_object)
       end
 
       describe "when publish_event! raises an error" do
         let(:test_object) { build_stubbed(:test_object) }
 
         it "logs an error" do
-          allow(Events::Publisher).to receive(:publish_event!).and_raise(StandardError)
+          allow(CleverEvents::Publisher).to receive(:publish_event!).and_raise(StandardError)
 
           expect { test_object.destroy }.to raise_error(StandardError)
         end
@@ -89,7 +89,7 @@ RSpec.describe Events::Publisher::Publishable do
         allow(TestObject).to receive(:_publishable_actions).and_return([])
         test_object = create(:test_object)
         test_object.destroy
-        expect(Events::Publisher).not_to have_received(:publish_event!)
+        expect(CleverEvents::Publisher).not_to have_received(:publish_event!)
       end
     end
 
@@ -98,7 +98,7 @@ RSpec.describe Events::Publisher::Publishable do
         allow(TestObject).to receive(:_publishable_actions).and_return([:update])
         test_object = create(:test_object)
         test_object.destroy
-        expect(Events::Publisher).not_to have_received(:publish_event!)
+        expect(CleverEvents::Publisher).not_to have_received(:publish_event!)
       end
     end
   end

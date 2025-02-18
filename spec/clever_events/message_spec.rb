@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-RSpec.describe Events::Message, type: :model do
+RSpec.describe CleverEvents::Message, type: :model do
   describe "#body" do
     let(:entity) { build_stubbed(:test_object) }
     let(:event) { described_class.new("test_object.updated", entity) }

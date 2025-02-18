@@ -1,9 +1,9 @@
 # frozen_string_literal: true
 
 require "aws-sdk-sns"
-require "clever_events_rails/events/adapters/sns_adapter/credentials"
+require "clever_events_rails/clever_events/adapters/sns_adapter/credentials"
 
-module Events
+module CleverEvents
   module Adapters
     module SnsAdapter
       class << self
@@ -30,7 +30,7 @@ module Events
         end
 
         def credentials
-          @credentials ||= Events::Adapters::SnsAdapter::Credentials.new
+          @credentials ||= CleverEvents::Adapters::SnsAdapter::Credentials.new
         end
       end
     end

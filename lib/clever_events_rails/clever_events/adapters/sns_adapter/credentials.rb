@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-module Events
+module CleverEvents
   module Adapters
     module SnsAdapter
       class Credentials

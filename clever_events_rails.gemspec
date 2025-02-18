@@ -40,7 +40,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "sqlite3"
   spec.add_development_dependency "temping"
 
-  spec.add_dependency "activesupport"
-  spec.add_dependency "aws-sdk-sns"
+  spec.add_runtime_dependency "activesupport"
+  spec.add_runtime_dependency "aws-sdk-sns"
   spec.add_runtime_dependency "railties", ">= 4.1"
 end

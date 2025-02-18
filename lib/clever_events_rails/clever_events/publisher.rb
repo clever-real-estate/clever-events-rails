@@ -1,20 +1,9 @@
 # frozen_string_literal: true
 
-module Events
+module CleverEvents
   module Publisher
     extend ActiveSupport::Concern
-    include Events::Publisher::Publishable
-    include Events::Adapters::SnsAdapter
-
-    included do
-      after_commit do
-        publish_event!(event_name) if publish_event?
-      end
-
-      def publish_event!(event_name)
-        Events::Publisher.publish_event!(event_name, self)
-      end
-    end
+    include CleverEvents::Adapters::SnsAdapter
 
     class << self
       def publish_event!(event_name, entity)
@@ -33,7 +22,7 @@ module Events
       end
 
       def event_adapter
-        Events::Adapters::SnsAdapter
+        CleverEvents::Adapters::SnsAdapter
       end
     end
   end
