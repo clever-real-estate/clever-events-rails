@@ -43,8 +43,18 @@ RSpec.configure do |config|
     end
   end
 
+  config.before do
+    CleverEvents.configure do |events_config|
+      events_config.publish_events = true
+      events_config.sns_topic_arn = "arn:aws:sns:us-east-1:000000000000:my-test-topic"
+    end
+  end
+
   config.after do
-    Temping.teardown
+    CleverEvents.configure do |events_config|
+      events_config.publish_events = false
+      events_config.sns_topic_arn = nil
+    end
   end
 end
 

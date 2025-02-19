@@ -11,15 +11,15 @@ module CleverEvents
         end
 
         def access_key_id
-          ENV["AWS_ACCESS_KEY_ID"]
+          CleverEvents.configuration.aws_access_key_id
         end
 
         def secret_access_key
-          ENV["AWS_SECRET_ACCESS_KEY"]
+          CleverEvents.configuration.aws_secret_access_key
         end
 
         def region
-          ENV["AWS_REGION"] || "us-east-1"
+          CleverEvents.configuration.aws_region
         end
       end
     end
