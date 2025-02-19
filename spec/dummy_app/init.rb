@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] ||= "test"
-require "rails"
 
 # require rails piece by piece
-
 %w[
   active_record/railtie
   action_controller/railtie
