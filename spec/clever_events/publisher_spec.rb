@@ -15,7 +15,7 @@ RSpec.describe CleverEvents::Publisher do
     end
 
     describe "when event publishing is disabled" do
-      let(:config) { Rails.configuration.clever_events_rails }
+      let(:config) { CleverEvents.configuration }
 
       it "does not publish an event" do
         allow(config).to receive(:publish_events).and_return(false)
@@ -31,6 +31,14 @@ RSpec.describe CleverEvents::Publisher do
           described_class.publish_event!("test_object.updated", test_object)
 
           expect(client).to have_received(:publish)
+        end
+
+        describe "when giving a custom topic_arn" do
+          it "publishes an event to the given sns topic" do
+            described_class.publish_event!("test_object.updated", test_object, "custom_topic_arn")
+
+            expect(client).to have_received(:publish).with(hash_including(topic_arn: "custom_topic_arn"))
+          end
         end
 
         describe "when the sns client raises an error" do

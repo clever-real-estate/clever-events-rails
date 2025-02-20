@@ -1,10 +1,8 @@
 # frozen_string_literal: true
 
 ENV["RAILS_ENV"] ||= "test"
-require "rails"
 
 # require rails piece by piece
-
 %w[
   active_record/railtie
   action_controller/railtie
@@ -35,7 +33,6 @@ module DummyApp
     config.dependency_loading = true
     config.preload_frameworks = true
     config.eager_load = true
-    config.clever_events_rails.publish_events = true
   end
 end
 

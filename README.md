@@ -3,12 +3,26 @@
 
 Add the gem to your gemfile:
 ```ruby
-gem "clever_events_rails", "~> 0.2.0", git: "https://github.com/clever-real-estate/clever-events-rails"
+gem "clever_events_rails", "~> 0.3.0", git: "https://github.com/clever-real-estate/clever-events-rails"
 ```
 
 ```
 bundle install
 ```
+
+## Configuration
+You will need to configure this gem via a configuration block. When using rails, this typically can go in an initializer:
+```ruby
+# config/initializers/clever_events.rb
+CleverEvents.configure do |config|
+  config.publish_events = false # set this to true to send events to whatever adapter
+  config.events_adapter = :sns #this is the default
+  config.aws_access_key_id = "my_access_key_id"
+  config.aws_secret_access_key = "super_duper_secret"
+  config.aws_region = "us-east-1"
+end
+```
+>Note: setting `publish_events` to some configuration your app uses will probably be your best bet, Either a custom config from an environment file or an env var
 
 ## Usage
 You can include the gem's module in the model you want to publish events from:
@@ -42,6 +56,7 @@ class SomeEventPublisherJob
     CleverEvents::Publisher.publish_event!(event_name, object)
   end
 end
+```
 
 ## Development
 

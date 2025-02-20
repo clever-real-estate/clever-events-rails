@@ -4,7 +4,6 @@ require "simplecov"
 
 require "pry"
 require "factory_bot"
-require "temping"
 
 require "clever_events_rails"
 
@@ -14,15 +13,6 @@ gem_root = spec.gem_dir
 helpers = Dir[File.join(gem_root, "spec", "support", "**", "*.rb")]
 helpers -= Dir[File.join(gem_root, "spec", "support", "test_models", "**", "*.rb")]
 helpers.each { |f| require f }
-
-Temping.class_eval do
-  # Force temping not to use its own connection, but use the Rails connection
-  def self.connect
-    ActiveRecord::Base.establish_connection
-  end
-end
-
-require "dummy_app/init"
 
 # Configure RSpec
 
@@ -53,7 +43,19 @@ RSpec.configure do |config|
     end
   end
 
+  config.before do
+    CleverEvents.configure do |events_config|
+      events_config.publish_events = true
+      events_config.sns_topic_arn = "arn:aws:sns:us-east-1:000000000000:my-test-topic"
+    end
+  end
+
   config.after do
-    Temping.teardown
+    CleverEvents.configure do |events_config|
+      events_config.publish_events = false
+      events_config.sns_topic_arn = nil
+    end
   end
 end
+
+require "dummy_app/init"
