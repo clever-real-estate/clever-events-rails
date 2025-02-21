@@ -7,8 +7,10 @@ RSpec.describe CleverEvents::Publisher do
     let(:test_object) { build_stubbed(:test_object) }
     let(:client) { Aws::SNS::Client.new(stub_responses: true) }
     let(:adapter_class) { CleverEvents::Adapters::SnsAdapter }
+    let(:test_uuid) { "test_uuid" }
 
     before do
+      allow(SecureRandom).to receive(:uuid).and_return(test_uuid)
       allow(described_class).to receive(:event_adapter).and_return(adapter_class)
       allow(Aws::SNS::Client).to receive(:new).and_return(client)
       allow(client).to receive(:publish)
@@ -20,7 +22,7 @@ RSpec.describe CleverEvents::Publisher do
       it "does not publish an event" do
         allow(config).to receive(:publish_events).and_return(false)
 
-        described_class.publish_event!("test_object.updated", test_object)
+        described_class.publish_event!("test_object.updated", test_object, test_uuid)
         expect(client).not_to have_received(:publish)
       end
     end
@@ -28,14 +30,14 @@ RSpec.describe CleverEvents::Publisher do
     describe "when event publishing is enabled" do
       describe "when using the sns adapter" do
         it "publishes an event to sns topic" do
-          described_class.publish_event!("test_object.updated", test_object)
+          described_class.publish_event!("test_object.updated", test_object, test_uuid)
 
           expect(client).to have_received(:publish)
         end
 
         describe "when giving a custom topic_arn" do
           it "publishes an event to the given sns topic" do
-            described_class.publish_event!("test_object.updated", test_object, "custom_topic_arn")
+            described_class.publish_event!("test_object.updated", test_object, test_uuid, "custom_topic_arn")
 
             expect(client).to have_received(:publish).with(hash_including(topic_arn: "custom_topic_arn"))
           end
@@ -48,7 +50,9 @@ RSpec.describe CleverEvents::Publisher do
           end
 
           it "raises an error" do # rubocop:disable RSpec/MultipleExpectations
-            expect { described_class.publish_event!("test_object.updated", test_object) }.to raise_error(StandardError)
+            expect do
+              described_class.publish_event!("test_object.updated", test_object, test_uuid)
+            end.to raise_error(StandardError)
             expect(Rails.logger).to have_received(:error)
               .with("Event publishing failed publishing to SNS: This is a test error")
           end

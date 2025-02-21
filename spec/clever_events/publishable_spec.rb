@@ -4,8 +4,10 @@ require "spec_helper"
 
 RSpec.describe CleverEvents::Publishable do
   let(:test_object) { build_stubbed(:test_object) }
+  let(:test_uuid) { "test_uuid" }
 
   before do
+    allow(SecureRandom).to receive(:uuid).and_return(test_uuid)
     allow(CleverEvents::Publisher).to receive(:publish_event!)
   end
 
@@ -19,7 +21,8 @@ RSpec.describe CleverEvents::Publishable do
 
       it "calls the publish_event! method" do
         test_object.update(first_name: "New Name")
-        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.updated", test_object)
+        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.updated", test_object,
+                                                                               test_uuid)
       end
 
       describe "when publish_event! raises an error" do
@@ -70,7 +73,8 @@ RSpec.describe CleverEvents::Publishable do
 
       it "calls the publish_event! method" do
         test_object.destroy
-        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.destroyed", test_object)
+        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.destroyed", test_object,
+                                                                               test_uuid)
       end
 
       describe "when publish_event! raises an error" do
