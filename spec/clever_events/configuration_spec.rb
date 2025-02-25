@@ -5,9 +5,9 @@ require "spec_helper"
 RSpec.describe CleverEvents::Configuration, type: :model do
   describe "#initialize" do
     it "sets default values" do # rubocop:disable RSpec/MultipleExpectations
-      config = CleverEvents.configuration
+      config = described_class.new
 
-      expect(config.publish_events).to be true
+      expect(config.publish_events).to be false
       expect(config.events_adapter).to eq(CleverEvents::Adapters::SnsAdapter)
       expect(config.aws_access_key_id).to be_nil
       expect(config.aws_secret_access_key).to be_nil
@@ -17,6 +17,9 @@ RSpec.describe CleverEvents::Configuration, type: :model do
 
   describe "#configure" do
     it "allows configuration of values" do # rubocop:disable RSpec/MultipleExpectations
+      # stub config object to not affect other tests
+      allow(CleverEvents).to receive(:configuration).and_return(described_class.new)
+
       CleverEvents.configure do |config|
         config.publish_events = false
         config.events_adapter = :sns

@@ -11,7 +11,6 @@ module CleverEvents
 
     def build_message
       {
-        default:,
         event_name:,
         entity_type:,
         entity_id:,
@@ -31,10 +30,6 @@ module CleverEvents
 
     def entity_id
       entity.id
-    end
-
-    def default
-      event_name
     end
   end
 end

@@ -4,8 +4,10 @@ require "spec_helper"
 
 RSpec.describe CleverEvents::Publishable do
   let(:test_object) { build_stubbed(:test_object) }
+  let(:test_uuid) { "test_uuid" }
 
   before do
+    allow(SecureRandom).to receive(:uuid).and_return(test_uuid)
     allow(CleverEvents::Publisher).to receive(:publish_event!)
   end
 
@@ -19,17 +21,8 @@ RSpec.describe CleverEvents::Publishable do
 
       it "calls the publish_event! method" do
         test_object.update(first_name: "New Name")
-        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.updated", test_object)
-      end
-
-      describe "when publish_event! raises an error" do
-        let(:test_object) { build_stubbed(:test_object) }
-
-        it "logs an error" do
-          allow(CleverEvents::Publisher).to receive(:publish_event!).and_raise(StandardError)
-
-          expect { test_object.update(first_name: "New Name") }.to raise_error(StandardError)
-        end
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid)
       end
     end
 
@@ -62,15 +55,16 @@ RSpec.describe CleverEvents::Publishable do
     end
 
     it "defines the actions to be published" do
-      expect(test_object.class._publishable_actions).to eq(%i[created updated destroyed])
+      expect(test_object.class._publishable_actions).to eq(%i[updated])
     end
 
     describe "when a publishable action is performed" do
       let(:test_object) { create(:test_object) }
 
       it "calls the publish_event! method" do
-        test_object.destroy
-        expect(CleverEvents::Publisher).to have_received(:publish_event!).with("TestObject.destroyed", test_object)
+        test_object.update(first_name: "New Name")
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid)
       end
 
       describe "when publish_event! raises an error" do
@@ -79,7 +73,7 @@ RSpec.describe CleverEvents::Publishable do
         it "logs an error" do
           allow(CleverEvents::Publisher).to receive(:publish_event!).and_raise(StandardError)
 
-          expect { test_object.destroy }.to raise_error(StandardError)
+          expect { test_object.publish_event! }.to raise_error(CleverEvents::Error)
         end
       end
     end

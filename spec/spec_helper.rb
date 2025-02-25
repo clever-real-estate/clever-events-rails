@@ -2,10 +2,13 @@
 
 require "simplecov"
 
+ENV["RAILS_ENV"] ||= "test"
+
 require "pry"
 require "factory_bot"
-
-require "clever_events_rails"
+require "vcr"
+require "webmock/rspec"
+WebMock.enable!
 
 spec = Gem::Specification.find_by_name("clever_events_rails")
 gem_root = spec.gem_dir
@@ -17,10 +20,8 @@ helpers.each { |f| require f }
 # Configure RSpec
 
 RSpec.configure do |config|
-  # Enable flags like --only-failures and --next-failure
   config.example_status_persistence_file_path = ".rspec_status"
 
-  # Disable RSpec exposing methods globally on `Module` and `main`
   config.disable_monkey_patching!
 
   config.expect_with :rspec do |c|
@@ -43,19 +44,12 @@ RSpec.configure do |config|
     end
   end
 
-  config.before do
-    CleverEvents.configure do |events_config|
-      events_config.publish_events = true
-      events_config.sns_topic_arn = "arn:aws:sns:us-east-1:000000000000:my-test-topic"
-    end
-  end
-
-  config.after do
-    CleverEvents.configure do |events_config|
-      events_config.publish_events = false
-      events_config.sns_topic_arn = nil
-    end
-  end
+  config.profile_examples = 10
+  config.order = :random
+  Kernel.srand config.seed
 end
 
-require "dummy_app/init"
+require_relative "../spec/dummy_app/config/environment"
+ActiveRecord::Migrator.migrations_paths = [File.expand_path("../spec/dummy_app/db/migrate", __dir__)]
+
+require "rspec/rails"

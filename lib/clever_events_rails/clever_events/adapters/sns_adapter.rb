@@ -7,18 +7,21 @@ module CleverEvents
   module Adapters
     module SnsAdapter
       class << self
-        def publish_event(event_name, entity, topic_arn = default_topic_arn)
+        def publish_event(event_name, entity, message_deduplication_id, topic_arn = default_topic_arn) # rubocop:disable Metrics/MethodLength
           raise "Invalid topic config" unless topic_arn ||= default_topic_arn
 
-          sns_client.publish(
+          response = sns_client.publish(
             topic_arn: topic_arn,
             message: Message.new(event_name, entity).build_message,
-            message_structure: "json",
-            subject: event_name
+            subject: event_name,
+            message_group_id: message_group_id(entity),
+            message_deduplication_id: message_deduplication_id
           )
+
+          Rails.logger.info("Event published to SNS message_id: #{response.message_id}") if response
         rescue StandardError => e
           Rails.logger.error("Event publishing failed publishing to SNS: #{e.message}")
-          raise e
+          raise CleverEvents::Error, e.message
         end
 
         private
@@ -37,6 +40,10 @@ module CleverEvents
 
         def default_topic_arn
           CleverEvents.configuration.sns_topic_arn
+        end
+
+        def message_group_id(entity)
+          "#{entity.class.name.underscore.downcase}.#{entity.id}"
         end
       end
     end

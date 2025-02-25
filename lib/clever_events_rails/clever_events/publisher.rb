@@ -6,13 +6,13 @@ module CleverEvents
     include CleverEvents::Adapters::SnsAdapter
 
     class << self
-      def publish_event!(event_name, entity, arn = nil)
+      def publish_event!(event_name, entity, message_deduplication_id, arn = nil)
         Rails.logger.warn("Event publishing disabled, check env") and return unless can_publish?
 
-        event_adapter.publish_event(event_name, entity, arn)
+        event_adapter.publish_event(event_name, entity, message_deduplication_id, arn)
       rescue StandardError => e
         Rails.logger.error("Event publishing failed: #{e.message}")
-        raise e
+        raise Error, e.message
       end
 
       private

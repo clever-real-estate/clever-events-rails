@@ -16,13 +16,19 @@ module CleverEvents
       end
 
       def publish_event!
-        CleverEvents::Publisher.publish_event!(event_name, self)
+        CleverEvents::Publisher.publish_event!(event_name, self, message_deduplication_id)
+      rescue StandardError => e
+        raise CleverEvents::Error, e.message
       end
 
       private
 
       def event_name
         "#{self.class.name}.#{event_type}"
+      end
+
+      def message_deduplication_id
+        SecureRandom.uuid
       end
     end
 
