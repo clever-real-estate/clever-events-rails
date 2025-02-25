@@ -26,12 +26,14 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
   spec.add_development_dependency "appraisal"
+  spec.add_development_dependency "dotenv"
   spec.add_development_dependency "factory_bot"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "pry-byebug"
   spec.add_development_dependency "rails"
   spec.add_development_dependency "rake"
   spec.add_development_dependency "rspec"
+  spec.add_development_dependency "rspec-rails"
   spec.add_development_dependency "rubocop"
   spec.add_development_dependency "rubocop-factory_bot"
   spec.add_development_dependency "rubocop-rake"
@@ -39,6 +41,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-cobertura"
   spec.add_development_dependency "sqlite3"
+  spec.add_development_dependency "vcr"
+  spec.add_development_dependency "webmock"
 
   spec.add_runtime_dependency "activesupport"
   spec.add_runtime_dependency "aws-sdk-sns"
