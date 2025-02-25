@@ -43,19 +43,7 @@ RSpec.configure do |config|
     end
   end
 
-  config.before do
-    CleverEvents.configure do |events_config|
-      events_config.publish_events = true
-      events_config.sns_topic_arn = "arn:aws:sns:us-east-1:000000000000:my-test-topic"
-    end
-  end
+require_relative "../spec/dummy_app/config/environment"
+ActiveRecord::Migrator.migrations_paths = [File.expand_path("../spec/dummy_app/db/migrate", __dir__)]
 
-  config.after do
-    CleverEvents.configure do |events_config|
-      events_config.publish_events = false
-      events_config.sns_topic_arn = nil
-    end
-  end
-end
-
-require "dummy_app/init"
+require "rspec/rails"
