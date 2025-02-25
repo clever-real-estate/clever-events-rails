@@ -1,0 +1,60 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://sns.us-east-1.amazonaws.com/
+    body:
+      encoding: UTF-8
+      string: Action=Publish&Message=%7B%22event_name%22%3A%22TestObject.updated%22%2C%22entity_type%22%3A%22TestObject%22%2C%22entity_id%22%3A1%2C%22path%22%3A%22%2Fapi%2Ftest_objects%2F1%22%7D&MessageDeduplicationId=a15fde42-5848-4802-b1c8-1058359dacd7&MessageGroupId=test_object.1&Subject=TestObject.updated&TopicArn=arn%3Aaws%3Asns%3Aus-east-1%3A123456789012%3Aclever-events&Version=2010-03-31
+    headers:
+      Accept-Encoding:
+      - ''
+      Amz-Sdk-Invocation-Id:
+      - b79d61ee-8f6c-4976-8a71-4cd135ba02b0
+      Content-Type:
+      - application/x-www-form-urlencoded; charset=utf-8
+      User-Agent:
+      - aws-sdk-ruby3/3.218.1 ua/2.1 api/sns#1.95.0 os/macos#23 md/arm64 lang/ruby#3.3.1
+        md/3.3.1 m/Z,b,D
+      Host:
+      - sns.us-east-1.amazonaws.com
+      X-Amz-Date:
+      - 20250225T165734Z
+      X-Amz-Content-Sha256:
+      - 221e61b2b842f8196dc8af8f795f6132afd6bf046c954f20d0ae10914d5437df
+      Authorization:
+      - AWS4-HMAC-SHA256 Credential=fake_access_key/20250225/us-east-1/sns/aws4_request,
+        SignedHeaders=amz-sdk-invocation-id;content-type;host;x-amz-content-sha256;x-amz-date,
+        Signature=5e0660f84a6403d39100aa5752d05435aaf019da94087ad1bf49b271c65041d4
+      Content-Length:
+      - '383'
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 403
+      message: Forbidden
+    headers:
+      X-Amzn-Requestid:
+      - bcea22ab-2a57-5155-a968-429cd2e9fb99
+      Date:
+      - Tue, 25 Feb 2025 16:57:34 GMT
+      Content-Type:
+      - text/xml
+      Content-Length:
+      - '305'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: |
+        <ErrorResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
+          <Error>
+            <Type>Sender</Type>
+            <Code>InvalidClientTokenId</Code>
+            <Message>The security token included in the request is invalid.</Message>
+          </Error>
+          <RequestId>bcea22ab-2a57-5155-a968-429cd2e9fb99</RequestId>
+        </ErrorResponse>
+  recorded_at: Tue, 25 Feb 2025 16:57:34 GMT
+recorded_with: VCR 6.3.1

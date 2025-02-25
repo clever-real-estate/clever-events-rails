@@ -49,12 +49,10 @@ RSpec.describe CleverEvents::Publisher do
             allow(Rails.logger).to receive(:error)
           end
 
-          it "raises an error" do # rubocop:disable RSpec/MultipleExpectations
+          it "raises an error" do
             expect do
               described_class.publish_event!("test_object.updated", test_object, test_uuid)
-            end.to raise_error(StandardError)
-            expect(Rails.logger).to have_received(:error)
-              .with("Event publishing failed publishing to SNS: This is a test error")
+            end.to raise_error(CleverEvents::Error, "This is a test error")
           end
         end
       end

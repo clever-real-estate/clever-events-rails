@@ -9,7 +9,6 @@ RSpec.describe CleverEvents::Message, type: :model do
 
     it "returns the correct json body" do
       expect(event.build_message).to eq({
-        default: "test_object.updated",
         event_name: "test_object.updated",
         entity_type: "TestObject",
         entity_id: entity.id,

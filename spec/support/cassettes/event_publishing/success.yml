@@ -1,0 +1,61 @@
+---
+http_interactions:
+- request:
+    method: post
+    uri: https://sns.us-east-1.amazonaws.com/
+    body:
+      encoding: UTF-8
+      string: Action=Publish&Message=%7B%22event_name%22%3A%22TestObject.updated%22%2C%22entity_type%22%3A%22TestObject%22%2C%22entity_id%22%3A1%2C%22path%22%3A%22%2Fapi%2Ftest_objects%2F1%22%7D&MessageDeduplicationId=4b247439-873f-4c17-8354-4dfb34a6b603&MessageGroupId=test_object.1&Subject=TestObject.updated&TopicArn=arn%3Aaws%3Asns%3Aus-east-1%3A032064916974%3Aagent_service_dev.fifo&Version=2010-03-31
+    headers:
+      Accept-Encoding:
+      - ''
+      Amz-Sdk-Invocation-Id:
+      - 97efbe2d-d5e7-4333-9984-9543f2360d9f
+      Content-Type:
+      - application/x-www-form-urlencoded; charset=utf-8
+      User-Agent:
+      - aws-sdk-ruby3/3.218.1 ua/2.1 api/sns#1.95.0 os/macos#23 md/arm64 lang/ruby#3.3.1
+        md/3.3.1 m/Z,b,D
+      Host:
+      - sns.us-east-1.amazonaws.com
+      X-Amz-Date:
+      - 20250221T185606Z
+      X-Amz-Content-Sha256:
+      - d1bfa40e9d42fa51be23a5a4ca8adc899fed3e623b2439410c4c5ff9982b665e
+      Authorization:
+      - AWS4-HMAC-SHA256 Credential=AKIAQO5ZXZXXMVFE6CHN/20250221/us-east-1/sns/aws4_request,
+        SignedHeaders=amz-sdk-invocation-id;content-type;host;x-amz-content-sha256;x-amz-date,
+        Signature=d63d7d72389ada4d27f4ca45082178a5c0f54e35ba777f276603c0c86441597c
+      Content-Length:
+      - '392'
+      Accept:
+      - "*/*"
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      X-Amzn-Requestid:
+      - 652a1c05-95e1-5923-8feb-7c375b67bf3d
+      Date:
+      - Fri, 21 Feb 2025 18:56:06 GMT
+      Content-Type:
+      - text/xml
+      Content-Length:
+      - '352'
+      Connection:
+      - keep-alive
+    body:
+      encoding: UTF-8
+      string: |
+        <PublishResponse xmlns="http://sns.amazonaws.com/doc/2010-03-31/">
+          <PublishResult>
+            <SequenceNumber>10000000000000022000</SequenceNumber>
+            <MessageId>5b689a32-5a9e-50e7-861e-fa009418f6f9</MessageId>
+          </PublishResult>
+          <ResponseMetadata>
+            <RequestId>652a1c05-95e1-5923-8feb-7c375b67bf3d</RequestId>
+          </ResponseMetadata>
+        </PublishResponse>
+  recorded_at: Fri, 21 Feb 2025 18:56:06 GMT
+recorded_with: VCR 6.3.1

@@ -12,7 +12,7 @@ module CleverEvents
         event_adapter.publish_event(event_name, entity, message_deduplication_id, arn)
       rescue StandardError => e
         Rails.logger.error("Event publishing failed: #{e.message}")
-        raise e
+        raise Error, e.message
       end
 
       private

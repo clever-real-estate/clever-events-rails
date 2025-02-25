@@ -4,7 +4,8 @@ require "simplecov-cobertura"
 
 SimpleCov.start do
   enable_coverage :branch
-  add_filter "/spec/dummy_app/"
+  add_filter "/spec/"
+  add_filter "/version.rb"
 
   formatter SimpleCov::Formatter::CoberturaFormatter if ENV["CI"]
 
