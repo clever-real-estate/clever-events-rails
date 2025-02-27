@@ -3,7 +3,7 @@
 
 Add the gem to your gemfile:
 ```ruby
-gem "clever_events_rails", "~> 0.4.0", git: "https://github.com/clever-real-estate/clever-events-rails"
+gem "clever_events_rails", "~> 0.5.0", git: "https://github.com/clever-real-estate/clever-events-rails"
 ```
 
 ```
