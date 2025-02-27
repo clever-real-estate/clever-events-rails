@@ -51,20 +51,24 @@ RSpec.describe CleverEvents::Publishable do
     let(:test_object) { build_stubbed(:test_object) }
 
     before do
-      allow(test_object).to receive(:_publishable_actions).and_return(%i[created updated destroyed])
+      allow(test_object.class).to receive(:_publishable_actions).and_return(%i[created updated destroyed])
     end
 
     it "defines the actions to be published" do
-      expect(test_object.class._publishable_actions).to eq(%i[updated])
+      expect(test_object.class._publishable_actions).to eq(%i[created updated destroyed])
     end
 
     describe "when a publishable action is performed" do
       let(:test_object) { create(:test_object) }
 
+      before do
+        allow(test_object.class).to receive(:_publishable_actions).and_return(%i[destroyed])
+      end
+
       it "calls the publish_event! method" do
-        test_object.update(first_name: "New Name")
+        test_object.destroy
         expect(CleverEvents::Publisher).to have_received(:publish_event!)
-          .with("TestObject.updated", test_object, test_uuid)
+          .with("TestObject.destroyed", test_object, test_uuid)
       end
 
       describe "when publish_event! raises an error" do

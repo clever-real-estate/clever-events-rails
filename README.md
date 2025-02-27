@@ -31,13 +31,15 @@ You can include the gem's module in the model you want to publish events from:
 class Object < ApplicationRecord
   include CleverEvents::Publishable
   ...
+  after_save :publish_event!
 end
 ```
 
 Simply including the `Publishable` module it will give access to a few methods:
 - `publishable_attrs` is a class attribute, that accepts an array of symbols corresponding to the attributes we want to send events about (updates only).
 - `publishable_actions` is another class attribute that accepts an array of symbols, corresponding to the _actions_ that the object undergoes. If this is not explicitly added, the defaults are `[:create, :update, :destroy]`.
-- `#publish_event` is automatically included. It synchrounously publishes an event via the adapter specified.
+- `#publish_event!` is automatically included. It synchronously publishes an event via the adapter specified.
+- `#publish_event?` is included and checks to see if the attrs were updated in the action given
 
 If you want to implement your own `#publish_event` method, just implement it in the model:
 ```ruby
