@@ -11,10 +11,6 @@ module CleverEvents
       class_attribute :_publishable_attrs, default: []
       class_attribute :_publishable_actions, default: %i[created updated destroyed]
 
-      after_commit do
-        publish_event! if publish_event?
-      end
-
       def publish_event!
         CleverEvents::Publisher.publish_event!(event_name, self, message_deduplication_id)
       rescue StandardError => e

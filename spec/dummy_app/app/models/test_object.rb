@@ -7,4 +7,7 @@ class TestObject < ActiveRecord::Base
 
   publishable_attrs :first_name, :last_name, :email, :phone
   publishable_actions :updated
+
+  after_save :publish_event!, if: :publish_event?
+  after_destroy :publish_event!, if: :publish_event?
 end
