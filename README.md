@@ -25,6 +25,8 @@ CleverEvents.configure do |config|
   config.aws_secret_access_key = "super_duper_secret"
   config.aws_region = "us-east-1"
   config.base_api_url = "https://example.com/api"
+  config.message_processor_adapter = :sqs
+  config.default_message_batch_size = 1 # how big of a message batch to handle, defaults to 1
 end
 ```
 

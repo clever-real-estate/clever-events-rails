@@ -15,10 +15,37 @@ RSpec.describe CleverEvents::Adapters::SnsAdapter, type: :model do
     end
 
     it "publishes a message to the sns topic" do
+      response = Aws::SNS::Types::PublishResponse.new(message_id: "test-message-id")
+      allow(sns_client).to receive(:publish).and_return(response)
+
       described_class.publish_event("test_event", test_object, test_uuid)
 
       expect(sns_client).to have_received(:publish).with(
         topic_arn: CleverEvents.configuration.sns_topic_arn,
+        message: CleverEvents::Message.new("test_event", test_object).build_message,
+        subject: "test_event",
+        message_group_id: "test_object.#{test_object.id}",
+        message_deduplication_id: test_uuid
+      )
+    end
+
+    it "handles nil response from SNS" do
+      allow(sns_client).to receive(:publish).and_return(nil)
+
+      described_class.publish_event("test_event", test_object, test_uuid)
+
+      expect(sns_client).to have_received(:publish)
+    end
+
+    it "uses provided topic_arn instead of default" do
+      custom_topic_arn = "arn:aws:sns:region:account:custom-topic"
+      response = Aws::SNS::Types::PublishResponse.new(message_id: "test-message-id")
+      allow(sns_client).to receive(:publish).and_return(response)
+
+      described_class.publish_event("test_event", test_object, test_uuid, custom_topic_arn)
+
+      expect(sns_client).to have_received(:publish).with(
+        topic_arn: custom_topic_arn,
         message: CleverEvents::Message.new("test_event", test_object).build_message,
         subject: "test_event",
         message_group_id: "test_object.#{test_object.id}",

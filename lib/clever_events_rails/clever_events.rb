@@ -8,6 +8,7 @@ module CleverEvents
   require "clever_events_rails/clever_events/publishable"
   require "clever_events_rails/clever_events/publisher"
   require "clever_events_rails/clever_events/configuration"
+  require "clever_events_rails/clever_events/subscriber"
 
   class << self
     def configuration

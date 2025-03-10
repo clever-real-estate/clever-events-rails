@@ -8,6 +8,8 @@ require "pry"
 require "factory_bot"
 require "vcr"
 require "webmock/rspec"
+require "rails"
+require "active_job"
 WebMock.enable!
 
 spec = Gem::Specification.find_by_name("clever_events_rails")
