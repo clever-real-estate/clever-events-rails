@@ -21,7 +21,7 @@ module CleverEvents
     private
 
     def path
-      "/api/#{entity_type.underscore.pluralize}/#{entity_id}"
+      "#{base_api_url}/#{entity_type.underscore.pluralize}/#{entity_id}"
     end
 
     def entity_type
@@ -30,6 +30,10 @@ module CleverEvents
 
     def entity_id
       entity.id
+    end
+
+    def base_api_url
+      CleverEvents.configuration.base_api_url
     end
   end
 end

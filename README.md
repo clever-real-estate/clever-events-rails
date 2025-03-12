@@ -1,7 +1,9 @@
 # CleverEventsRails
+
 ## Installation
 
 Add the gem to your gemfile:
+
 ```ruby
 gem "clever_events_rails", "~> 0.5.0", git: "https://github.com/clever-real-estate/clever-events-rails"
 ```
@@ -11,7 +13,9 @@ bundle install
 ```
 
 ## Configuration
+
 You will need to configure this gem via a configuration block. When using rails, this typically can go in an initializer:
+
 ```ruby
 # config/initializers/clever_events.rb
 CleverEvents.configure do |config|
@@ -20,11 +24,14 @@ CleverEvents.configure do |config|
   config.aws_access_key_id = "my_access_key_id"
   config.aws_secret_access_key = "super_duper_secret"
   config.aws_region = "us-east-1"
+  config.base_api_url = "https://example.com/api"
 end
 ```
->Note: setting `publish_events` to some configuration your app uses will probably be your best bet, Either a custom config from an environment file or an env var
+
+> Note: setting `publish_events` to some configuration your app uses will probably be your best bet, Either a custom config from an environment file or an env var
 
 ## Usage
+
 You can include the gem's module in the model you want to publish events from:
 
 ```ruby
@@ -36,20 +43,24 @@ end
 ```
 
 Simply including the `Publishable` module it will give access to a few methods:
+
 - `publishable_attrs` is a class attribute, that accepts an array of symbols corresponding to the attributes we want to send events about (updates only).
 - `publishable_actions` is another class attribute that accepts an array of symbols, corresponding to the _actions_ that the object undergoes. If this is not explicitly added, the defaults are `[:create, :update, :destroy]`.
 - `#publish_event!` is automatically included. It synchronously publishes an event via the adapter specified.
 - `#publish_event?` is included and checks to see if the attrs were updated in the action given
 
 If you want to implement your own `#publish_event` method, just implement it in the model:
+
 ```ruby
 def publish_event!
   SomeEventPublisherJob.perform_later(event_name, self) # or whatever implementation you want
 end
 ```
+
 > Note: `event_name` is a method included in whatever class includes CleverEvents::Publisher, which outputs a name in the structure of `object_class.action`, ex: `TestObject.updated`.
 
 And then make sure your implementation eventually calls `.publish_event!` (make sure you include the `CleverEvents::Publisher` module to have access to `.publish_event!` wherever you call it from):
+
 ```ruby
 class SomeEventPublisherJob
   include CleverEvents::Publishaer
