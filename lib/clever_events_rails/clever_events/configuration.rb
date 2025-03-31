@@ -14,7 +14,8 @@ module CleverEvents
                   :aws_secret_access_key,
                   :aws_region,
                   :publish_events,
-                  :sns_topic_arn
+                  :sns_topic_arn,
+                  :base_api_url
     attr_writer :events_adapter
 
     def initialize
