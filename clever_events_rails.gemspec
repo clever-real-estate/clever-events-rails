@@ -25,6 +25,7 @@ Gem::Specification.new do |spec|
   spec.executables = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
+  spec.add_development_dependency "activejob"
   spec.add_development_dependency "appraisal"
   spec.add_development_dependency "dotenv"
   spec.add_development_dependency "factory_bot"
@@ -36,8 +37,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec-rails"
   spec.add_development_dependency "rubocop"
   spec.add_development_dependency "rubocop-factory_bot"
+  spec.add_development_dependency "rubocop-rails"
   spec.add_development_dependency "rubocop-rake"
   spec.add_development_dependency "rubocop-rspec"
+  spec.add_development_dependency "rubocop-rspec_rails"
   spec.add_development_dependency "simplecov"
   spec.add_development_dependency "simplecov-cobertura"
   spec.add_development_dependency "sqlite3"
@@ -46,5 +49,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency "activesupport"
   spec.add_runtime_dependency "aws-sdk-sns"
+  spec.add_runtime_dependency "aws-sdk-sqs"
   spec.add_runtime_dependency "railties", ">= 4.1"
 end

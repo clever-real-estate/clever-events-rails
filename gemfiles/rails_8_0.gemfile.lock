@@ -4,6 +4,7 @@ PATH
     clever_events_rails (0.5.0)
       activesupport
       aws-sdk-sns
+      aws-sdk-sqs
       railties (>= 4.1)
 
 GEM
@@ -96,6 +97,9 @@ GEM
       base64
       jmespath (~> 1, >= 1.6.1)
     aws-sdk-sns (1.95.0)
+      aws-sdk-core (~> 3, >= 3.216.0)
+      aws-sigv4 (~> 1.5)
+    aws-sdk-sqs (1.93.0)
       aws-sdk-core (~> 3, >= 3.216.0)
       aws-sigv4 (~> 1.5)
     aws-sigv4 (1.11.0)
@@ -270,10 +274,18 @@ GEM
       parser (>= 3.3.1.0)
     rubocop-factory_bot (2.26.1)
       rubocop (~> 1.61)
+    rubocop-rails (2.29.1)
+      activesupport (>= 4.2.0)
+      rack (>= 1.1)
+      rubocop (>= 1.52.0, < 2.0)
+      rubocop-ast (>= 1.31.1, < 2.0)
     rubocop-rake (0.6.0)
       rubocop (~> 1.0)
     rubocop-rspec (3.4.0)
       rubocop (~> 1.61)
+    rubocop-rspec_rails (2.30.0)
+      rubocop (~> 1.61)
+      rubocop-rspec (~> 3, >= 3.0.1)
     ruby-progressbar (1.13.0)
     securerandom (0.4.1)
     simplecov (0.22.0)
@@ -326,6 +338,7 @@ PLATFORMS
   x86_64-linux-musl
 
 DEPENDENCIES
+  activejob
   appraisal
   clever_events_rails!
   dotenv
@@ -338,8 +351,10 @@ DEPENDENCIES
   rspec-rails
   rubocop
   rubocop-factory_bot
+  rubocop-rails
   rubocop-rake
   rubocop-rspec
+  rubocop-rspec_rails
   simplecov
   simplecov-cobertura
   sqlite3 (>= 2.1)
