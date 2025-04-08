@@ -1,88 +1,132 @@
 # CleverEventsRails
 
+A Rails engine for publishing and processing events using AWS SNS and SQS.
+
 ## Installation
 
-Add the gem to your gemfile:
+Add this line to your application's Gemfile:
 
 ```ruby
-gem "clever_events_rails", "~> 0.5.0", git: "https://github.com/clever-real-estate/clever-events-rails"
+gem "clever_events_rails"
 ```
 
-```
-bundle install
+And then execute:
+
+```bash
+$ bundle install
 ```
 
-## Configuration
+Or install it yourself as:
 
-You will need to configure this gem via a configuration block. When using rails, this typically can go in an initializer:
+```bash
+$ gem install clever_events_rails
+```
+
+## Usage
+
+### Configuration
+
+Configure the gem in an initializer:
 
 ```ruby
 # config/initializers/clever_events.rb
 CleverEvents.configure do |config|
-  config.publish_events = false # set this to true to send events to whatever adapter
-  config.events_adapter = :sns #this is the default
-  config.aws_access_key_id = "my_access_key_id"
-  config.aws_secret_access_key = "super_duper_secret"
+  config.publish_events = true
+  config.sns_topic_arn = "arn:aws:sns:region:account-id:topic-name"
+  config.sqs_queue_url = "https://sqs.region.amazonaws.com/account-id/queue-name"
+  config.aws_access_key_id = "your-access-key"
+  config.aws_secret_access_key = "your-secret-key"
   config.aws_region = "us-east-1"
-  config.base_api_url = "https://example.com/api"
-  config.message_processor_adapter = :sqs
-  config.default_message_batch_size = 1 # how big of a message batch to handle, defaults to 1
+  config.base_api_url = "http://localhost:3000/api"
+  config.fifo_topic = true # Set to true if using FIFO topics
 end
 ```
 
-> Note: setting `publish_events` to some configuration your app uses will probably be your best bet, Either a custom config from an environment file or an env var
+### Publishing Events
 
-## Usage
-
-You can include the gem's module in the model you want to publish events from:
+Include the `Publishable` module in your models:
 
 ```ruby
-class Object < ApplicationRecord
+class User < ApplicationRecord
   include CleverEvents::Publishable
-  ...
-  after_save :publish_event!
+
+  publishable_attrs :name, :email
+  publishable_actions :create, :update, :destroy
 end
 ```
 
-Simply including the `Publishable` module it will give access to a few methods:
+Events will be published to SNS when:
 
-- `publishable_attrs` is a class attribute, that accepts an array of symbols corresponding to the attributes we want to send events about (updates only).
-- `publishable_actions` is another class attribute that accepts an array of symbols, corresponding to the _actions_ that the object undergoes. If this is not explicitly added, the defaults are `[:create, :update, :destroy]`.
-- `#publish_event!` is automatically included. It synchronously publishes an event via the adapter specified.
-- `#publish_event?` is included and checks to see if the attrs were updated in the action given
+- A publishable attribute is updated
+- A publishable action is performed
 
-If you want to implement your own `#publish_event` method, just implement it in the model:
+### Processing Events
+
+Process events from SQS:
 
 ```ruby
-def publish_event!
-  SomeEventPublisherJob.perform_later(event_name, self) # or whatever implementation you want
-end
+CleverEvents::Processor.process_messages
 ```
 
-> Note: `event_name` is a method included in whatever class includes CleverEvents::Publisher, which outputs a name in the structure of `object_class.action`, ex: `TestObject.updated`.
+This will:
 
-And then make sure your implementation eventually calls `.publish_event!` (make sure you include the `CleverEvents::Publisher` module to have access to `.publish_event!` wherever you call it from):
+1. Receive messages from SQS
+2. Process each message
+3. Delete processed messages from the queue
+4. Log processing results
 
-```ruby
-class SomeEventPublisherJob
-  include CleverEvents::Publishaer
+### Message Format
 
-  def perform_later(event_name, object)
-    CleverEvents::Publisher.publish_event!(event_name, object)
-  end
-end
+Events are published in the following format:
+
+```json
+{
+  "event_name": "user.updated",
+  "entity_type": "user",
+  "entity_id": "123",
+  "path": "http://localhost:3000/api/users/123",
+  "message_attributes": {
+    "event_name": {
+      "data_type": "String",
+      "string_value": "user.updated"
+    },
+    "entity_type": {
+      "data_type": "String",
+      "string_value": "user"
+    },
+    "entity_id": {
+      "data_type": "String",
+      "string_value": "123"
+    }
+  }
+}
 ```
+
+### Error Handling
+
+The gem provides error handling for:
+
+- Invalid topic configuration
+- SNS publishing failures
+- SQS processing failures
+- Invalid message formats
+
+Errors are logged and raised as `CleverEvents::Error` instances.
 
 ## Development
 
 After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
 
-To install this gem onto your local machine, run `bundle exec rake install`.
+To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and the created tag, and push the `.gem` file to [rubygems.org](https://rubygems.org).
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/clever-real-estate/clever_events_rails.
+Bug reports and pull requests are welcome on GitHub at https://github.com/clever/clever_events_rails. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/clever/clever_events_rails/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
+## Code of Conduct
+
+Everyone interacting in the CleverEventsRails project's codebases, issue trackers, chat rooms and mailing lists is expected to follow the [code of conduct](https://github.com/clever/clever_events_rails/blob/main/CODE_OF_CONDUCT.md).

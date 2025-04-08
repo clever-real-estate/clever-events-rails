@@ -3,7 +3,6 @@
 module CleverEvents
   module Publisher
     extend ActiveSupport::Concern
-    include CleverEvents::Adapters::SnsAdapter
 
     class << self
       def publish_event!(event_name, entity, message_deduplication_id, arn = nil)

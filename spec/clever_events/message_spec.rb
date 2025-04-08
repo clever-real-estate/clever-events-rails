@@ -10,7 +10,7 @@ RSpec.describe CleverEvents::Message, type: :model do
     it "returns the correct json body" do
       expect(event.build_message).to eq({
         event_name: "test_object.updated",
-        entity_type: "TestObject",
+        entity_type: "test_object",
         entity_id: entity.id,
         path: "http://localhost:3000/api/test_objects/#{entity.id}"
       }.to_json)

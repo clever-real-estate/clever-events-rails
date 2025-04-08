@@ -12,6 +12,7 @@ module CleverEvents
     DEFAULT_MESSAGE_PROCESSOR_ADAPTER = :sqs
     DEFAULT_PUBLISH_EVENTS = false
     DEFAULT_MESSAGE_BATCH_SIZE = 1
+    DEFAULT_SOURCE = "clever_events_rails"
 
     attr_accessor :aws_access_key_id,
                   :aws_secret_access_key,
@@ -20,11 +21,12 @@ module CleverEvents
                   :sns_topic_arn,
                   :base_api_url,
                   :sqs_queue_url,
-                  :default_message_batch_size
+                  :default_message_batch_size,
+                  :source
     attr_writer :events_adapter,
                 :message_processor_adapter
 
-    def initialize
+    def initialize # rubocop:disable Metrics/MethodLength
       @events_adapter = DEFAULT_EVENTS_ADAPTER
       @message_processor_adapter = DEFAULT_MESSAGE_PROCESSOR_ADAPTER
       @aws_access_key_id = nil
@@ -34,6 +36,8 @@ module CleverEvents
       @sqs_queue_url = nil
       @publish_events = DEFAULT_PUBLISH_EVENTS
       @default_message_batch_size = DEFAULT_MESSAGE_BATCH_SIZE
+      @fifo_topic = false
+      @source = DEFAULT_SOURCE
     end
 
     def events_adapter
@@ -42,6 +46,10 @@ module CleverEvents
 
     def message_processor_adapter
       ADAPTERS[@message_processor_adapter] || CleverEvents::Adapters::SqsAdapter
+    end
+
+    def fifo_topic?
+      @fifo_topic
     end
   end
 end
