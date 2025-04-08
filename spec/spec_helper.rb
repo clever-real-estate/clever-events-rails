@@ -10,6 +10,8 @@ require "vcr"
 require "webmock/rspec"
 require "rails"
 require "active_job"
+require "active_support/testing/time_helpers"
+
 WebMock.enable!
 
 spec = Gem::Specification.find_by_name("clever_events_rails")
@@ -45,6 +47,8 @@ RSpec.configure do |config|
       end
     end
   end
+
+  config.include ActiveSupport::Testing::TimeHelpers
 
   config.profile_examples = 10
   config.order = :random

@@ -2,6 +2,8 @@
 
 module CleverEvents
   class Message
+    MESSAGE_VERSION = "1.0"
+
     attr_reader :event_name, :entity
 
     def initialize(event_name, entity)
@@ -18,6 +20,15 @@ module CleverEvents
       }.to_json
     end
 
+    def message_attributes
+      {
+        event_name: string_attribute(event_name),
+        source: string_attribute(source),
+        time: string_attribute(timestamp),
+        message_version: string_attribute(MESSAGE_VERSION)
+      }
+    end
+
     private
 
     def path
@@ -25,7 +36,7 @@ module CleverEvents
     end
 
     def entity_type
-      entity.class.to_s
+      entity.class.to_s.underscore.downcase
     end
 
     def entity_id
@@ -34,6 +45,21 @@ module CleverEvents
 
     def base_api_url
       CleverEvents.configuration.base_api_url
+    end
+
+    def source
+      CleverEvents.configuration.source
+    end
+
+    def timestamp
+      Time.now.iso8601
+    end
+
+    def string_attribute(value)
+      {
+        string_value: value,
+        data_type: "String"
+      }
     end
   end
 end

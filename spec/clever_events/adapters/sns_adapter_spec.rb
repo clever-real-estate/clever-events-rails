@@ -25,7 +25,7 @@ RSpec.describe CleverEvents::Adapters::SnsAdapter, type: :model do
         message: CleverEvents::Message.new("test_event", test_object).build_message,
         subject: "test_event",
         message_group_id: "test_object.#{test_object.id}",
-        message_deduplication_id: test_uuid
+        message_attributes: CleverEvents::Message.new("test_event", test_object).message_attributes
       )
     end
 
@@ -49,7 +49,7 @@ RSpec.describe CleverEvents::Adapters::SnsAdapter, type: :model do
         message: CleverEvents::Message.new("test_event", test_object).build_message,
         subject: "test_event",
         message_group_id: "test_object.#{test_object.id}",
-        message_deduplication_id: test_uuid
+        message_attributes: CleverEvents::Message.new("test_event", test_object).message_attributes
       )
     end
 
@@ -60,6 +60,25 @@ RSpec.describe CleverEvents::Adapters::SnsAdapter, type: :model do
         expect do
           described_class.publish_event("test_event", test_object, test_uuid)
         end.to raise_error(CleverEvents::Error, "Invalid topic config")
+      end
+    end
+
+    describe "when fifo topic is enabled" do
+      it "populates the deduplication id" do
+        allow(CleverEvents.configuration).to receive(:fifo_topic?).and_return(true)
+
+        freeze_time do
+          described_class.publish_event("test_event", test_object, test_uuid)
+
+          expect(sns_client).to have_received(:publish).with(
+            topic_arn: CleverEvents.configuration.sns_topic_arn,
+            message: CleverEvents::Message.new("test_event", test_object).build_message,
+            subject: "test_event",
+            message_group_id: "test_object.#{test_object.id}",
+            message_deduplication_id: test_uuid,
+            message_attributes: CleverEvents::Message.new("test_event", test_object).message_attributes
+          )
+        end
       end
     end
   end
