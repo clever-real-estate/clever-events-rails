@@ -65,7 +65,7 @@ Events will be published to SNS when:
 Process events from SQS:
 
 ```ruby
-CleverEvents::Processor.process_messages
+CleverEvents::Subscriber.receive_messages
 ```
 
 This will:
