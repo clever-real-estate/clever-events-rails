@@ -7,6 +7,8 @@ module CleverEvents
   module Publishable
     extend ActiveSupport::Concern
 
+    attr_accessor :skip_publish
+
     included do
       class_attribute :_publishable_attrs, default: []
       class_attribute :_publishable_actions, default: %i[created updated destroyed]
@@ -41,8 +43,13 @@ module CleverEvents
     def publish_event?
       return false if self.class._publishable_attrs.empty?
       return false unless self.class._publishable_actions.include?(event_type)
+      return false if skip_publish?
 
       self.class._publishable_attrs.intersection(changes).any?
+    end
+
+    def skip_publish?
+      !!@skip_publish
     end
 
     def changes

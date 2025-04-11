@@ -100,4 +100,32 @@ RSpec.describe CleverEvents::Publishable do
       end
     end
   end
+
+  describe "skipping publish" do
+    let(:test_object) { create(:test_object) }
+
+    describe "when skip_publish is true" do
+      it "does not call publish_event!" do
+        test_object.update(first_name: "New Name", skip_publish: true)
+
+        expect(CleverEvents::Publisher).not_to have_received(:publish_event!)
+      end
+    end
+
+    describe "when skip_publish is false" do
+      it "calls publish_event!" do
+        test_object.update(first_name: "New Name", skip_publish: false)
+
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+      end
+    end
+
+    describe "when skip_publish is not set" do
+      it "calls publish_event!" do
+        test_object.update(first_name: "New Name")
+
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+      end
+    end
+  end
 end
