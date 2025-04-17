@@ -24,7 +24,6 @@ RSpec.describe CleverEvents::Adapters::SnsAdapter, type: :model do
         topic_arn: CleverEvents.configuration.sns_topic_arn,
         message: CleverEvents::Message.new("test_event", test_object).build_message,
         subject: "test_event",
-        message_group_id: "test_object.#{test_object.id}",
         message_attributes: CleverEvents::Message.new("test_event", test_object).message_attributes
       )
     end
@@ -48,7 +47,6 @@ RSpec.describe CleverEvents::Adapters::SnsAdapter, type: :model do
         topic_arn: custom_topic_arn,
         message: CleverEvents::Message.new("test_event", test_object).build_message,
         subject: "test_event",
-        message_group_id: "test_object.#{test_object.id}",
         message_attributes: CleverEvents::Message.new("test_event", test_object).message_attributes
       )
     end
