@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    clever_events_rails (0.6.0)
+    clever_events_rails (0.6.1)
       activesupport
       aws-sdk-sns
       aws-sdk-sqs

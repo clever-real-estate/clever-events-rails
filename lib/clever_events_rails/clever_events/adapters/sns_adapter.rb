@@ -47,10 +47,9 @@ module CleverEvents
           topic_arn: topic_arn,
           message: message.build_message,
           subject: event_name,
-          message_group_id: message_group_id(entity),
           message_attributes: message.message_attributes
         }.tap do |options|
-          options[:message_deduplication_id] = message_deduplication_id if CleverEvents.configuration.fifo_topic?
+          options.merge!(fifo_options) if CleverEvents.configuration.fifo_topic?
         end
       end
 
@@ -72,6 +71,13 @@ module CleverEvents
 
       def message_group_id(entity)
         "#{entity.class.name.underscore.downcase}.#{entity.id}"
+      end
+
+      def fifo_options
+        {
+          message_deduplication_id: message_deduplication_id,
+          message_group_id: message_group_id(entity)
+        }
       end
     end
   end
