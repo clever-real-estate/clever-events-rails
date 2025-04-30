@@ -3,7 +3,7 @@
 require "spec_helper"
 
 module CleverEventsRails
-  RSpec.describe "SQS Message Processing Integration Test", type: :request do
+  RSpec.describe "SQS Message Processing Integration Test" do
     let(:sqs_client) { Aws::SQS::Client.new(stub_responses: true) }
     let(:queue_url) { "https://sqs.test.amazonaws.com/123456789012/test-queue" }
     let(:receipt_handle) { "test-receipt-handle" }

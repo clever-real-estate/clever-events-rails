@@ -9,5 +9,5 @@ SimpleCov.start do
 
   formatter SimpleCov::Formatter::CoberturaFormatter if ENV["CI"]
 
-  SimpleCov.command_name "appraisal-#{ENV["BUNDLE_GEMFILE"]}"
+  SimpleCov.command_name "appraisal-#{ENV.fetch("BUNDLE_GEMFILE", nil)}"
 end
