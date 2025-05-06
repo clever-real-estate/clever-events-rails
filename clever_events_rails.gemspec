@@ -11,6 +11,7 @@ Gem::Specification.new do |spec|
   spec.summary = "Smart event pub/sub for rails apps"
   spec.license = "MIT"
   spec.required_ruby_version = ">= 3.1.0"
+  spec.metadata["rubygems_mfa_required"] = "true"
 
   # Specify which files should be added to the gem when it is released.
   # The `git ls-files -z` loads the files in the RubyGem that have been added into git.
@@ -47,8 +48,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "vcr"
   spec.add_development_dependency "webmock"
 
-  spec.add_runtime_dependency "activesupport"
-  spec.add_runtime_dependency "aws-sdk-sns"
-  spec.add_runtime_dependency "aws-sdk-sqs"
-  spec.add_runtime_dependency "railties", ">= 4.1"
+  spec.add_dependency "activesupport"
+  spec.add_dependency "aws-sdk-sns"
+  spec.add_dependency "aws-sdk-sqs"
+  spec.add_dependency "railties", ">= 4.1"
 end

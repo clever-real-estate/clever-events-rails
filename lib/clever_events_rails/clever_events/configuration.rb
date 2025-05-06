@@ -22,7 +22,8 @@ module CleverEvents
                   :base_api_url,
                   :sqs_queue_url,
                   :default_message_batch_size,
-                  :source
+                  :source,
+                  :sqs_dlq_url
     attr_writer :events_adapter,
                 :message_processor_adapter
 
@@ -38,6 +39,7 @@ module CleverEvents
       @default_message_batch_size = DEFAULT_MESSAGE_BATCH_SIZE
       @fifo_topic = false
       @source = DEFAULT_SOURCE
+      @sqs_dlq_url = nil
     end
 
     def events_adapter
