@@ -46,7 +46,7 @@ CleverEvents.configure do |config|
 
   # SQS Configuration
   config.sqs_queue_url = "https://sqs.region.amazonaws.com/account-id/queue-name"
-  # Optional Dead Letter Queue (DLQ) for failed messages
+  # Optional Dead Letter Queue (DLQ) URL for tracking failed messages
   config.sqs_dlq_url = "https://sqs.region.amazonaws.com/account-id/dead-letter-queue-name"
 
   # API Configuration
@@ -121,7 +121,7 @@ messages = CleverEvents::Adapters::SqsAdapter.receive_messages(
 
 # Delete a single message
 CleverEvents::Adapters::SqsAdapter.delete_message(
-  message: sqs_message,
+  receipt_handle: sqs_message.receipt_handle,
   queue_url: "custom-queue-url"   # Optional, defaults to configured queue
 )
 
@@ -138,7 +138,7 @@ CleverEvents::Adapters::SqsAdapter.process_messages(
   queue_url: "custom-queue-url"   # Optional, defaults to configured queue
 )
 
-# Send a message to SQS (useful for DLQ scenarios)
+# Send a message to SQS
 CleverEvents::Adapters::SqsAdapter.send_message(
   queue_url: "queue-url",
   message_body: "message body",
@@ -191,30 +191,39 @@ CleverEvents::Adapters::SqsAdapter.process_messages(
 
 #### Automatic Retry and Dead Letter Queue (DLQ) Handling
 
-The processor base class provides automatic handling for:
+The processor relies on AWS SQS's native retry and dead letter queue functionality:
 
-1. Processing errors with SQS's native retry mechanism
-2. Moving messages to a Dead Letter Queue (DLQ) after max retries
-3. Error logging and tracking
+1. Configure your SQS queue with a redrive policy in AWS that specifies:
 
-When a message fails processing:
+   - A Dead Letter Queue target (create a separate SQS queue for this)
+   - A maximum receive count threshold (how many failed processing attempts before a message moves to the DLQ)
 
-- If the retry count is below the maximum (controlled by SQS redrive policy),
-  the error is re-raised, which returns the message to SQS for retry
-- If the retry count exceeds the maximum and a DLQ is configured,
-  the message is sent to the DLQ with error details
-- If no DLQ is configured, a warning is logged
+2. When a message fails processing in your application:
 
-The message sent to the DLQ includes additional attributes:
+   - The processor logs the error and re-raises it
+   - SQS's built-in retry mechanism handles returning the message to the queue
+   - After exceeding the maximum receive count, SQS automatically moves the message to the DLQ
 
-```ruby
-{
-  "original_queue" => { data_type: "String", string_value: original_queue_url },
-  "failure_reason" => { data_type: "String", string_value: error_message },
-  "retry_count" => { data_type: "Number", string_value: retry_count },
-  "failed_at" => { data_type: "String", string_value: timestamp }
-}
-```
+3. No manual DLQ handling is required in your code; AWS takes care of:
+   - Tracking retry attempts via the ApproximateReceiveCount
+   - Moving messages to the DLQ when retries are exhausted
+   - Preserving the original message content
+
+To set up a DLQ in AWS:
+
+1. Create a regular SQS queue to serve as your DLQ
+2. When creating or editing your source queue, configure the "Dead-letter queue" settings:
+   - Enable the DLQ
+   - Select your DLQ queue
+   - Set the "Maximum receives" value (e.g., 5)
+
+This approach is more reliable than handling DLQ logic in the application code because:
+
+- AWS SQS guarantees delivery to the DLQ even if your application crashes
+- Message retry counting is handled by AWS infrastructure
+- You can use the AWS Console or APIs to inspect and redrive failed messages
+
+The `sqs_dlq_url` setting in the configuration is still used for tracking and reference purposes.
 
 #### Using Background Jobs
 
@@ -225,54 +234,36 @@ class SqsMessageProcessorJob < ApplicationJob
   queue_as :default
 
   def perform
-    messages = CleverEvents::Adapters::SqsAdapter.receive_messages
+    messages = CleverEvents::Subscriber.receive_messages
 
-    CleverEvents::Adapters::SqsAdapter.process_messages(
-      messages: messages,
-      processor_class: MyMessageProcessor
-    )
+    messages.each do |message|
+      begin
+        process_message(message)
+        CleverEvents::Adapters::SqsAdapter.delete_message(
+          receipt_handle: message.receipt_handle
+        )
+      rescue StandardError => e
+        Rails.logger.error("Failed to process message: #{e.class} - #{e.message}")
+      end
+    end
+  end
+
+  private
+
+  def process_message(message)
+    data = JSON.parse(message.body)
+    Rails.logger.info("Processing message: #{data}")
+    # Your custom processing logic here
   end
 end
 ```
 
-### Message Format
+Set up a scheduler to run this job periodically:
 
-Events are published in the following format:
-
-```json
-{
-  "event_name": "user.updated",
-  "entity_type": "user",
-  "entity_id": "123",
-  "path": "http://localhost:3000/api/users/123",
-  "message_attributes": {
-    "event_name": {
-      "data_type": "String",
-      "string_value": "user.updated"
-    },
-    "entity_type": {
-      "data_type": "String",
-      "string_value": "user"
-    },
-    "entity_id": {
-      "data_type": "String",
-      "string_value": "123"
-    }
-  }
-}
+```ruby
+# Use a gem like sidekiq-scheduler or whenever to schedule this
+SqsMessageProcessorJob.perform_later
 ```
-
-### Error Handling
-
-The gem provides error handling for:
-
-- Invalid topic or queue configuration
-- SNS publishing failures
-- SQS processing failures
-- Invalid message formats
-- DLQ handling errors
-
-Errors are logged and raised as `CleverEvents::Error` instances.
 
 ## Development
 

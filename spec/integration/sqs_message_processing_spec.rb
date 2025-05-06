@@ -2,7 +2,7 @@
 
 require "spec_helper"
 
-module CleverEventsRails
+module CleverEventsRails # rubocop:disable Metrics/ModuleLength
   RSpec.describe "SQS Message Processing Integration Test" do
     let(:sqs_client) { Aws::SQS::Client.new(stub_responses: true) }
     let(:queue_url) { "https://sqs.test.amazonaws.com/123456789012/test-queue" }
@@ -22,7 +22,8 @@ module CleverEventsRails
           Aws::SQS::Types::Message.new(
             message_id: "test-message-1",
             receipt_handle: receipt_handle,
-            body: { event_type: "test_event", data: "test data" }.to_json
+            body: { event_type: "test_event", data: "test data" }.to_json,
+            attributes: { "ApproximateReceiveCount" => "1" }
           )
         ]
       end
@@ -64,15 +65,22 @@ module CleverEventsRails
 
       context "when message processing fails" do
         before do
-          allow(JSON).to receive(:parse).and_raise(StandardError, "Processing error")
+          processing_error = StandardError.new("Failed to process")
+          job_instance = SqsMessageProcessorJob.new
+          allow(job_instance).to receive(:process_message).and_raise(processing_error)
+          allow(SqsMessageProcessorJob).to receive(:new).and_return(job_instance)
         end
 
-        it "logs the error but does not raise it" do
+        it "logs the error and continues processing other messages" do
           SqsMessageProcessorJob.perform_now
 
-          expect(logger).to have_received(:error).with(
-            "Failed to process message: StandardError - Processing error"
-          )
+          expect(logger).to have_received(:error).with(/Failed to process message: StandardError - Failed to process/)
+        end
+
+        it "doesn't delete the failed message so SQS can retry it" do
+          SqsMessageProcessorJob.perform_now
+
+          expect(sqs_client).not_to have_received(:delete_message)
         end
       end
 
@@ -118,6 +126,74 @@ module CleverEventsRails
       it "falls back to SQS adapter when invalid adapter is configured" do
         CleverEvents.configuration.message_processor_adapter = :invalid
         expect(CleverEvents.configuration.message_processor_adapter).to eq(CleverEvents::Adapters::SqsAdapter)
+      end
+    end
+
+    describe "custom processor classes" do
+      let(:test_processor_class) do
+        Class.new(CleverEvents::Processor) do
+          def process_message
+            data = JSON.parse(message.body)
+            Rails.logger.info("Processing test message: #{data}")
+            true
+          end
+        end
+      end
+
+      before do
+        messages = [
+          Aws::SQS::Types::Message.new(
+            message_id: "test-message-2",
+            receipt_handle: receipt_handle,
+            body: { event_type: "test_event", data: "test data" }.to_json,
+            attributes: { "ApproximateReceiveCount" => "1" }
+          )
+        ]
+
+        allow(sqs_client).to receive_messages(
+          receive_message: Aws::SQS::Types::ReceiveMessageResult.new(messages: messages),
+          delete_message: {}
+        )
+        # Make the anonymous class behave like a named class for testing
+        stub_const("TestProcessor", test_processor_class)
+
+        # Store the first message for test access
+        @test_message = messages.first
+      end
+
+      it "processes messages using the custom processor" do
+        processor = TestProcessor.new(@test_message, queue_url: queue_url)
+        allow(processor).to receive(:process_message)
+        allow(TestProcessor).to receive(:new).and_return(processor)
+
+        TestProcessor.process(@test_message, queue_url: queue_url)
+
+        expect(processor).to have_received(:process_message)
+      end
+
+      it "raises errors from custom processor" do
+        error = StandardError.new("Custom processor error")
+        processor = TestProcessor.new(@test_message, queue_url: queue_url)
+        allow(processor).to receive(:process_message).and_raise(error)
+        allow(TestProcessor).to receive(:new).and_return(processor)
+
+        expect { TestProcessor.process(@test_message, queue_url: queue_url) }.to raise_error(error)
+      end
+
+      it "logs errors from custom processor" do
+        error = StandardError.new("Custom processor error")
+        processor = TestProcessor.new(@test_message, queue_url: queue_url)
+        allow(processor).to receive(:process_message).and_raise(error)
+        allow(TestProcessor).to receive(:new).and_return(processor)
+
+        # Suppress the actual error to focus on the logging behavior
+        begin
+          TestProcessor.process(@test_message, queue_url: queue_url)
+        rescue StandardError
+          # Expected error
+        end
+
+        expect(logger).to have_received(:error).with("Failed to process message: Custom processor error")
       end
     end
   end

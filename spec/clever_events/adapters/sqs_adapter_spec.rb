@@ -387,6 +387,34 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
       expect(sqs_client).not_to have_received(:delete_message_batch)
     end
 
+    it "handles nil response without logging failure messages" do
+      allow(sqs_client).to receive(:delete_message_batch).and_return(nil)
+
+      described_class.delete_messages(test_messages)
+
+      expect(Rails.logger).not_to have_received(:error).with(/Failed to delete message/)
+    end
+
+    it "handles nil response without logging success messages" do
+      allow(sqs_client).to receive(:delete_message_batch).and_return(nil)
+
+      described_class.delete_messages(test_messages)
+
+      expect(Rails.logger).not_to have_received(:info).with(/Deleted \d+ messages from SQS/)
+    end
+
+    it "handles response with nil failed entries without logging failures" do
+      response_with_nil_failed = Aws::SQS::Types::DeleteMessageBatchResult.new(
+        successful: [Aws::SQS::Types::DeleteMessageBatchResultEntry.new(id: "0")],
+        failed: nil
+      )
+      allow(sqs_client).to receive(:delete_message_batch).and_return(response_with_nil_failed)
+
+      described_class.delete_messages(test_messages)
+
+      expect(Rails.logger).not_to have_received(:error).with(/Failed to delete message/)
+    end
+
     context "with deletion failures" do
       before do
         failure_response = Aws::SQS::Types::DeleteMessageBatchResult.new(
@@ -417,11 +445,11 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
       end
 
       it "logs the error" do
-        begin
-          described_class.delete_messages(test_messages)
-        rescue StandardError
-          # Rescue to continue test
-        end
+        # Suppress the actual error to focus on the logging behavior
+        allow(described_class).to receive(:raise)
+
+        # Call will raise an error, but we've suppressed it for this test
+        described_class.delete_messages(test_messages)
 
         expect(Rails.logger).to have_received(:error)
           .with("Failed to batch delete messages from SQS: SQS Batch Delete Error")
@@ -493,36 +521,16 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
       expect(result).to be true
     end
 
-    describe "when SQS returns an error" do
-      before do
-        allow(sqs_client).to receive(:send_message).and_raise(
-          Aws::SQS::Errors::ServiceError.new(nil, "SQS error")
-        )
-      end
+    it "handles nil response without logging message ID" do
+      allow(sqs_client).to receive(:send_message).and_return(nil)
 
-      it "logs the error" do
-        begin
-          described_class.send_message(
-            queue_url: queue_url,
-            message_body: message_body,
-            message_attributes: message_attributes
-          )
-        rescue StandardError
-          # Rescue to allow test to continue
-        end
+      described_class.send_message(
+        queue_url: queue_url,
+        message_body: message_body,
+        message_attributes: message_attributes
+      )
 
-        expect(Rails.logger).to have_received(:error).with("Failed to send message to SQS: SQS error")
-      end
-
-      it "re-raises the error" do
-        expect do
-          described_class.send_message(
-            queue_url: queue_url,
-            message_body: message_body,
-            message_attributes: message_attributes
-          )
-        end.to raise_error(StandardError, "SQS error")
-      end
+      expect(Rails.logger).not_to have_received(:info).with(/Sent message to SQS:/)
     end
 
     describe "when the queue_url is not set" do
@@ -536,6 +544,41 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
             message_attributes: message_attributes
           )
         end.to raise_error(CleverEvents::Error, "Invalid queue config")
+      end
+    end
+
+    context "when SQS returns an error" do
+      let(:error) { Aws::SQS::Errors::ServiceError.new(nil, "SQS error") }
+
+      before do
+        allow(sqs_client).to receive(:send_message).and_raise(error)
+      end
+
+      it "logs the error message" do
+        # Suppress the actual error to focus on the logging behavior
+        allow(error).to receive(:backtrace).and_return(nil)
+        # Call with rescue to avoid letting the error propagate
+        begin
+          described_class.send_message(
+            queue_url: queue_url,
+            message_body: message_body,
+            message_attributes: message_attributes
+          )
+        rescue Aws::SQS::Errors::ServiceError
+          # Expected error, just catching it
+        end
+
+        expect(Rails.logger).to have_received(:error).with("Failed to send message to SQS: SQS error")
+      end
+
+      it "re-raises the error" do
+        expect do
+          described_class.send_message(
+            queue_url: queue_url,
+            message_body: message_body,
+            message_attributes: message_attributes
+          )
+        end.to raise_error(Aws::SQS::Errors::ServiceError)
       end
     end
   end
