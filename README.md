@@ -46,8 +46,6 @@ CleverEvents.configure do |config|
 
   # SQS Configuration
   config.sqs_queue_url = "https://sqs.region.amazonaws.com/account-id/queue-name"
-  # Optional Dead Letter Queue (DLQ) URL for tracking failed messages
-  config.sqs_dlq_url = "https://sqs.region.amazonaws.com/account-id/dead-letter-queue-name"
 
   # API Configuration
   # Base URL for generating paths to API resources
@@ -80,7 +78,6 @@ end
 | `sns_topic_arn`              | ARN of the SNS topic to publish events to                      | `nil`                   |
 | `fifo_topic`                 | Set to true when using FIFO topics to enable deduplication IDs | `false`                 |
 | `sqs_queue_url`              | URL of the SQS queue to receive messages from                  | `nil`                   |
-| `sqs_dlq_url`                | URL of the Dead Letter Queue for failed messages               | `nil`                   |
 | `base_api_url`               | Base URL for generating API resource paths                     | `nil`                   |
 | `default_message_batch_size` | Number of messages to process in a batch                       | `1`                     |
 | `source`                     | Custom source identifier for published events                  | `"clever_events_rails"` |
@@ -189,41 +186,27 @@ CleverEvents::Adapters::SqsAdapter.process_messages(
 )
 ```
 
-#### Automatic Retry and Dead Letter Queue (DLQ) Handling
+#### Automatic Retry Handling
 
-The processor relies on AWS SQS's native retry and dead letter queue functionality:
+The processor relies on AWS SQS's native retry functionality:
 
-1. Configure your SQS queue with a redrive policy in AWS that specifies:
-
-   - A Dead Letter Queue target (create a separate SQS queue for this)
-   - A maximum receive count threshold (how many failed processing attempts before a message moves to the DLQ)
-
-2. When a message fails processing in your application:
+1. When a message fails processing in your application:
 
    - The processor logs the error and re-raises it
    - SQS's built-in retry mechanism handles returning the message to the queue
-   - After exceeding the maximum receive count, SQS automatically moves the message to the DLQ
+   - The message becomes available again after the visibility timeout
 
-3. No manual DLQ handling is required in your code; AWS takes care of:
-   - Tracking retry attempts via the ApproximateReceiveCount
-   - Moving messages to the DLQ when retries are exhausted
-   - Preserving the original message content
+2. You can track the number of processing attempts:
 
-To set up a DLQ in AWS:
+   - Each message includes an `ApproximateReceiveCount` attribute
+   - The processor logs this value when errors occur
 
-1. Create a regular SQS queue to serve as your DLQ
-2. When creating or editing your source queue, configure the "Dead-letter queue" settings:
-   - Enable the DLQ
-   - Select your DLQ queue
-   - Set the "Maximum receives" value (e.g., 5)
+3. To configure SQS retry behavior:
+   - Adjust the visibility timeout on your SQS queue
+   - This determines how long a message is hidden after being received
+   - For example, a 30-second timeout gives your processor 30 seconds to complete
 
-This approach is more reliable than handling DLQ logic in the application code because:
-
-- AWS SQS guarantees delivery to the DLQ even if your application crashes
-- Message retry counting is handled by AWS infrastructure
-- You can use the AWS Console or APIs to inspect and redrive failed messages
-
-The `sqs_dlq_url` setting in the configuration is still used for tracking and reference purposes.
+This approach leverages AWS SQS's built-in reliability features for handling retries.
 
 #### Using Background Jobs
 

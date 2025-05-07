@@ -176,7 +176,6 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
   end
 
   describe ".process_messages" do
-    # Define smaller helper methods to avoid method length violations
     def test_message(id)
       Aws::SQS::Types::Message.new(
         message_id: "test-message-#{id}",
@@ -233,14 +232,12 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
 
     it "continues processing remaining messages when one fails" do
       messages = test_messages
-      # First message fails, second succeeds
       allow(processor_class).to receive(:process).with(messages[0], queue_url: queue_url)
                                                  .and_raise(StandardError.new("Processing error"))
       allow(processor_class).to receive(:process).with(messages[1], queue_url: queue_url)
 
       described_class.process_messages(messages, processor_class: processor_class)
 
-      # Should only delete the second message
       expect(sqs_client).to have_received(:delete_message_batch).with(
         queue_url: queue_url,
         entries: [{ id: "0", receipt_handle: "test-receipt-handle-2" }]
@@ -260,7 +257,6 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
     end
 
     it "does not call delete_message_batch if no messages were successfully processed" do
-      # All messages fail
       allow(processor_class).to receive(:process).and_raise(StandardError.new("Processing error"))
 
       described_class.process_messages(test_messages, processor_class: processor_class)
@@ -296,7 +292,6 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
 
       described_class.process_messages(large_test_batch, processor_class: processor_class)
 
-      # Should have called delete_message_batch 3 times (10, 10, 5)
       expect(sqs_client).to have_received(:delete_message_batch).exactly(3).times
     end
 
@@ -314,7 +309,6 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
   end
 
   describe ".delete_messages" do
-    # Use smaller helper methods
     def test_message(id)
       Aws::SQS::Types::Message.new(
         message_id: "test-message-#{id}",
@@ -373,12 +367,10 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
     end
 
     it "processes messages in batches of 10" do
-      # Create 25 messages
       large_batch = (1..25).map { |i| test_message(i.to_s) }
 
       described_class.delete_messages(large_batch)
 
-      # Should have called delete_message_batch 3 times (10, 10, 5)
       expect(sqs_client).to have_received(:delete_message_batch).exactly(3).times
     end
 
@@ -445,10 +437,8 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
       end
 
       it "logs the error" do
-        # Suppress the actual error to focus on the logging behavior
         allow(described_class).to receive(:raise)
 
-        # Call will raise an error, but we've suppressed it for this test
         described_class.delete_messages(test_messages)
 
         expect(Rails.logger).to have_received(:error)
@@ -464,7 +454,6 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
   end
 
   describe ".send_message" do
-    # Define helper methods instead of instance variables or let
     def message_body
       "test message body"
     end
@@ -555,17 +544,14 @@ RSpec.describe CleverEvents::Adapters::SqsAdapter, type: :model do
       end
 
       it "logs the error message" do
-        # Suppress the actual error to focus on the logging behavior
         allow(error).to receive(:backtrace).and_return(nil)
-        # Call with rescue to avoid letting the error propagate
-        begin
+
+        suppress(StandardError) do
           described_class.send_message(
             queue_url: queue_url,
             message_body: message_body,
             message_attributes: message_attributes
           )
-        rescue Aws::SQS::Errors::ServiceError
-          # Expected error, just catching it
         end
 
         expect(Rails.logger).to have_received(:error).with("Failed to send message to SQS: SQS error")
