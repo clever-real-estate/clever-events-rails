@@ -16,12 +16,12 @@ module CleverEvents
       process_message
     rescue StandardError => e
       log_error(e)
-      raise e # Re-raise the error to let SQS handle retries and DLQ routing
+      raise e
     end
 
     private
 
-    attr_reader :message, :retry_count, :queue_url
+    attr_reader :message, :queue_url, :retry_count
 
     def process_message
       raise NotImplementedError, "#{self.class.name} must implement process_message method"

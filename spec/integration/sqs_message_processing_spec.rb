@@ -154,10 +154,8 @@ module CleverEventsRails # rubocop:disable Metrics/ModuleLength
           receive_message: Aws::SQS::Types::ReceiveMessageResult.new(messages: messages),
           delete_message: {}
         )
-        # Make the anonymous class behave like a named class for testing
         stub_const("TestProcessor", test_processor_class)
 
-        # Store the first message for test access
         @test_message = messages.first
       end
 
@@ -186,11 +184,8 @@ module CleverEventsRails # rubocop:disable Metrics/ModuleLength
         allow(processor).to receive(:process_message).and_raise(error)
         allow(TestProcessor).to receive(:new).and_return(processor)
 
-        # Suppress the actual error to focus on the logging behavior
-        begin
+        suppress(StandardError) do
           TestProcessor.process(@test_message, queue_url: queue_url)
-        rescue StandardError
-          # Expected error
         end
 
         expect(logger).to have_received(:error).with("Failed to process message: Custom processor error")

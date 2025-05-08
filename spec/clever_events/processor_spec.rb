@@ -3,9 +3,7 @@
 require "spec_helper"
 
 class DummyProcessor < CleverEvents::Processor
-  def process_message
-    # Implementation for testing
-  end
+  def process_message; end
 end
 
 # Processor without process_message implementation
@@ -90,13 +88,10 @@ RSpec.describe CleverEvents::Processor do
       end
 
       it "logs the error message" do
-        # Suppress the actual error to focus on the logging behavior
         allow(processor).to receive(:raise)
 
-        begin
+        suppress(StandardError) do
           processor.process
-        rescue StandardError
-          nil
         end
 
         expect(Rails.logger).to have_received(:error).with("Failed to process message: test error")
@@ -138,6 +133,7 @@ RSpec.describe CleverEvents::Processor do
 
     it "logs the error message when backtrace is nil" do
       allow(error).to receive(:backtrace).and_return(nil)
+
       processor.send(:log_error, error)
 
       expect(Rails.logger).to have_received(:error).with("Failed to process message: test error")

@@ -21,8 +21,6 @@ helpers = Dir[File.join(gem_root, "spec", "support", "**", "*.rb")]
 helpers -= Dir[File.join(gem_root, "spec", "support", "test_models", "**", "*.rb")]
 helpers.each { |f| require f }
 
-# Configure RSpec
-
 RSpec.configure do |config|
   config.example_status_persistence_file_path = ".rspec_status"
 
