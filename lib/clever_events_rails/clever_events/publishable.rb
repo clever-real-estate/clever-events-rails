@@ -45,6 +45,8 @@ module CleverEvents
       return false unless self.class._publishable_actions.include?(event_type)
       return false if skip_publish?
 
+      return true if event_type == :destroyed
+
       self.class._publishable_attrs.intersection(changes).any?
     end
 
