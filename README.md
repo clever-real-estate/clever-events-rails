@@ -13,13 +13,13 @@ gem "clever_events_rails"
 And then execute:
 
 ```bash
-$ bundle install
+bundle install
 ```
 
 Or install it yourself as:
 
 ```bash
-$ gem install clever_events_rails
+gem install clever_events_rails
 ```
 
 ## Usage
@@ -101,6 +101,56 @@ Events will be published to SNS when:
 
 - A publishable attribute is updated
 - A publishable action is performed
+
+#### Custom Topic ARNs
+
+You can specify custom topic ARNs for different models or instances:
+
+##### Class-level Custom Topic ARN
+
+Configure a custom topic ARN for all instances of a model:
+
+```ruby
+class User < ApplicationRecord
+  include CleverEvents::Publishable
+
+  publishable_attrs :name, :email
+  publishable_actions :create, :update, :destroy
+  publishable_topic_arn "arn:aws:sns:us-east-1:123456789012:user-events"
+end
+
+class Order < ApplicationRecord
+  include CleverEvents::Publishable
+
+  publishable_attrs :status, :total
+  publishable_actions :create, :update
+  publishable_topic_arn "arn:aws:sns:us-east-1:123456789012:order-events"
+end
+```
+
+##### Instance-level Custom Topic ARN
+
+Override the topic ARN for specific instances:
+
+```ruby
+user = User.new(name: "John", email: "john@example.com")
+user.topic_arn = "arn:aws:sns:us-east-1:123456789012:vip-user-events"
+user.save! # Will publish to the VIP topic instead of the default or class-level topic
+
+# Reset to use class-level or default topic
+user.topic_arn = nil
+user.update!(name: "John Doe") # Will use class-level or default topic
+```
+
+##### Topic ARN Priority
+
+The system uses the following priority order for determining which topic ARN to use:
+
+1. **Instance-level** `topic_arn` (highest priority)
+2. **Class-level** `publishable_topic_arn`
+3. **Global default** from configuration (`config.sns_topic_arn`)
+
+If none are set, the system will raise an error.
 
 ### Processing Events
 
@@ -256,7 +306,7 @@ To install this gem onto your local machine, run `bundle exec rake install`. To 
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/clever/clever_events_rails. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/clever/clever_events_rails/blob/main/CODE_OF_CONDUCT.md).
+Bug reports and pull requests are welcome on GitHub at <https://github.com/clever/clever_events_rails>. This project is intended to be a safe, welcoming space for collaboration, and contributors are expected to adhere to the [code of conduct](https://github.com/clever/clever_events_rails/blob/main/CODE_OF_CONDUCT.md).
 
 ## License
 
