@@ -5,6 +5,7 @@ require "spec_helper"
 RSpec.describe CleverEvents::Publishable do
   let(:test_object) { build_stubbed(:test_object) }
   let(:test_uuid) { "test_uuid" }
+  let(:custom_arn) { "arn:aws:sns:us-east-1:123456789012:custom-topic" }
 
   before do
     allow(SecureRandom).to receive(:uuid).and_return(test_uuid)
@@ -22,7 +23,7 @@ RSpec.describe CleverEvents::Publishable do
       it "calls the publish_event! method" do
         test_object.update(first_name: "New Name")
         expect(CleverEvents::Publisher).to have_received(:publish_event!)
-          .with("TestObject.updated", test_object, test_uuid)
+          .with("TestObject.updated", test_object, test_uuid, nil)
       end
     end
 
@@ -68,7 +69,7 @@ RSpec.describe CleverEvents::Publishable do
       it "calls the publish_event! method" do
         test_object.destroy
         expect(CleverEvents::Publisher).to have_received(:publish_event!)
-          .with("TestObject.destroyed", test_object, test_uuid)
+          .with("TestObject.destroyed", test_object, test_uuid, nil)
       end
 
       describe "when publish_event! raises an error" do
@@ -117,6 +118,7 @@ RSpec.describe CleverEvents::Publishable do
         test_object.update(first_name: "New Name", skip_publish: false)
 
         expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid, nil)
       end
     end
 
@@ -125,6 +127,78 @@ RSpec.describe CleverEvents::Publishable do
         test_object.update(first_name: "New Name")
 
         expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid, nil)
+      end
+    end
+  end
+
+  describe ".publishable_topic_arn" do
+    before do
+      TestObject.publishable_topic_arn(custom_arn)
+    end
+
+    after do
+      TestObject.publishable_topic_arn(nil)
+    end
+
+    it "sets the class-level topic ARN" do
+      expect(TestObject._publishable_topic_arn).to eq(custom_arn)
+    end
+
+    describe "when publishing an event" do
+      let(:test_object) { create(:test_object) }
+
+      it "uses the custom topic ARN" do
+        test_object.update(first_name: "New Name")
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid, custom_arn)
+      end
+    end
+  end
+
+  describe "instance-level topic_arn" do
+    let(:test_object) { create(:test_object) }
+    let(:instance_arn) { "arn:aws:sns:us-east-1:123456789012:instance-topic" }
+
+    describe "when instance topic_arn is set" do
+      it "uses the instance topic ARN" do
+        test_object.topic_arn = instance_arn
+        test_object.update(first_name: "New Name")
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid, instance_arn)
+      end
+    end
+
+    describe "when both class and instance topic ARNs are set" do
+      before do
+        TestObject.publishable_topic_arn(custom_arn)
+      end
+
+      after do
+        TestObject.publishable_topic_arn(nil)
+      end
+
+      it "prioritizes the instance topic ARN" do
+        test_object.topic_arn = instance_arn
+        test_object.update(first_name: "New Name")
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid, instance_arn)
+      end
+    end
+
+    describe "when only class topic ARN is set" do
+      before do
+        TestObject.publishable_topic_arn(custom_arn)
+      end
+
+      after do
+        TestObject.publishable_topic_arn(nil)
+      end
+
+      it "uses the class topic ARN" do
+        test_object.update(first_name: "New Name")
+        expect(CleverEvents::Publisher).to have_received(:publish_event!)
+          .with("TestObject.updated", test_object, test_uuid, custom_arn)
       end
     end
   end

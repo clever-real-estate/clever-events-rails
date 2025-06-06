@@ -34,6 +34,31 @@ module CleverEventsRails
             end
           end
         end
+
+        context "when using custom topic ARN" do
+          let(:custom_arn) { "arn:aws:sns:us-east-1:123456789012:custom-topic" }
+          let(:sns_client) { Aws::SNS::Client.new(stub_responses: true) }
+
+          before do
+            TestObject.publishable_topic_arn(custom_arn)
+            allow(Aws::SNS::Client).to receive(:new).and_return(sns_client)
+            allow(sns_client).to receive(:publish).and_return(
+              Aws::SNS::Types::PublishResponse.new(message_id: "custom-message-id")
+            )
+          end
+
+          after do
+            TestObject.publishable_topic_arn(nil)
+          end
+
+          it "publishes to the custom topic ARN" do
+            patch Rails.application.routes.url_helpers.test_object_path(test_object, valid_attributes)
+
+            expect(sns_client).to have_received(:publish).with(
+              hash_including(topic_arn: custom_arn)
+            )
+          end
+        end
       end
 
       context "when the request is invalid" do
