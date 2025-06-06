@@ -2,6 +2,20 @@
 
 ## [Unreleased]
 
+## [0.8.0] - 2025-06-06
+
+### Features
+
+- Added support for custom topic ARN specification per class and instance
+- Added ability to publish events when objects are destroyed
+
+### Changes
+
+- Code quality improvements including removal of inline comments
+- Enhanced test structure with suppress blocks for error-raising tests
+- Updated documentation to remove deprecated DLQ configuration references
+- Updated .gitignore file
+
 ## [0.7.0] - 2025-05-06
 
 ### Changes
